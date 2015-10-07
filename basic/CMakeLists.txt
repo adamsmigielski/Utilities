@@ -1,6 +1,6 @@
-PROJECT(common)
+PROJECT(basic)
 
-ADD_LIBRARY (common STATIC
+ADD_LIBRARY (basic STATIC
 			 Align.hpp
              Assert.hpp
              BreakToDebug.hpp
