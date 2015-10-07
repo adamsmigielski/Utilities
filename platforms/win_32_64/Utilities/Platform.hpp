@@ -50,7 +50,7 @@
 #endif /* O8_IS_MINGW */
 
 /* Typedefs */
-namespace O8
+namespace Utilities
 {
     typedef int8_t       int8;
     typedef uint8_t      uint8;

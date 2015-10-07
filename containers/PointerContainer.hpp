@@ -29,57 +29,54 @@
 * @file PointerContainer.hpp
 **/
 
-#ifndef O8_TEMPLATES_POINTER_CONTAINER_HPP
-#define O8_TEMPLATES_POINTER_CONTAINER_HPP
+#ifndef UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP
+#define UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP
 
 #include <algorithm>
 
-#include <O8\Templates\Type.hpp>
+#include <Utilities\helpers\Type.hpp>
 
-namespace O8
+namespace Containers
 {
-    namespace Templates
+    namespace PointerContainer
     {
-        namespace PointerContainer
+        template <class T>
+        class Operations
         {
-            template <class T>
-            class Operations
-            {
-            public:
-				typedef Type<T> type;
+        public:
+			typedef Helpers::Type<T> type;
 
-                static void Delete_entry(typename type::pointer_reference entry);
+            static void Delete_entry(typename type::pointer_reference entry);
 
             
-            };
+        };
         
-            template <class C>
-            void Remove_all(C & container);
+        template <class C>
+        void Remove_all(C & container);
 
 
 
-            template <class T>
-            void Operations<T>::Delete_entry(typename Operations<T>::pointer_reference entry)
+        template <class T>
+        void Operations<T>::Delete_entry(typename Operations<T>::pointer_reference entry)
+        {
+            pointer ptr = entry;
+
+            entry = nullptr;
+
+
+            if (nullptr != ptr)
             {
-                pointer ptr = entry;
-
-                entry = nullptr;
-
-
-                if (nullptr != ptr)
-                {
-                    delete ptr;
-                }
+                delete ptr;
             }
+        }
 
-            template <class C>
-            void Remove_all(C & container)
-            {
-                std::for_each(container.begin(), container.end(), Operations<typename Templates::Utilities::Type<typename C::value_type>::value_type>::Delete_entry);
-            }
+        template <class C>
+        void Remove_all(C & container)
+        {
+            std::for_each(container.begin(), container.end(), Operations<typename Helpers::Type<typename C::value_type>::value_type>::Delete_entry);
         }
     }
 }
 
-#endif /* O8_TEMPLATES_POINTER_CONTAINER_HPP */
+#endif /* UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP */
 

@@ -29,15 +29,15 @@
 * @file PCH.hpp
 **/
 
-#ifndef O8_UTILITY_PCH_HPP
-#define O8_UTILITY_PCH_HPP
+#ifndef UTILITIES_MEMORY_PCH_HPP
+#define UTILITIES_MEMORY_PCH_HPP
 
-#include <O8\Platform.hpp>
+#include <Utilities\Platform.hpp>
 
-#include <O8\Common\Assert.hpp>
-#include <O8\Common\BreakToDebug.hpp>
-#include <O8\Common\Log.hpp>
+#include <Utilities\common\Assert.hpp>
+#include <Utilities\common\BreakToDebug.hpp>
+#include <Utilities\common\Log.hpp>
 
 #include <iostream>
 
-#endif /* O8_UTILITY_PCH_HPP */
+#endif /* UTILITIES_MEMORY_PCH_HPP */

@@ -29,356 +29,353 @@
 * @file SharedResource.hpp
 **/
 
-#ifndef O8_TEMPLATES_SHAREDRESOURCE_HPP
-#define O8_TEMPLATES_SHAREDRESOURCE_HPP
+#ifndef UTILITIES_CONTAINERS_SHAREDRESOURCE_HPP
+#define UTILITIES_CONTAINERS_SHAREDRESOURCE_HPP
 
-namespace O8
+namespace Containers
 {
-    namespace Templates
+    namespace SharedResource
     {
-        namespace SharedResource
+        template <typename T>
+        class Reference<T>;
+
+        template <typename T>
+        class Event_handler
         {
-            template <typename T>
-            class Reference<T>;
+        public:
+            virtual ~Event_handler() {}
 
-            template <typename T>
-            class Event_handler
-            {
-            public:
-                virtual ~Event_handler() {}
-
-                virtual void On_owner_destruction(T * resource);
-                virtual void On_last_reference_gone(
-                    T * resource,
-                    bool & should_owner_be_destoyed);
-            };
-
-            template <typename T>
-            class Owner
-            {
-                friend class Reference<T>
-            public:
-                static Owner * Create();
-                static Owner * Create(T * resource);
-                ~Owner();
-
-                void Set_event_handler(Event_handler * handler);
-
-            private:
-                Owner();
-                Owner(T * resource);
-
-                void increase_reference_count();
-                void decrease_reference_count();
-
-                Event_handler * m_event_handler;
-                T * m_resource;
-                uint32 m_reference_counter;
-            };
-
-            template <typename T>
-            class Reference
-            {
-            public:
-                Reference();
-                Reference(T * resource);
-                Reference(const Reference & reference);
-                Reference(Reference && reference);
-                Reference & operator = (const Reference & reference);
-                Reference & operator = (Reference && reference);
-                ~Reference();
-
-                void Reset(T * resource);
-                void Release();
-
-                Owner * Get_owner();
-
-                T * operator * ();
-                const T * operator * () const;
-
-                T * operator -> ();
-                const T * operator -> () const;
-
-                T * Get();
-                const T * Get() const;
-
-            private:
-                void set(T * resource);
-
-                Owner * m_owner;
-                T * m_resource;
-            };
-
-            template <typename T>
-            void Event_handler<T>::On_owner_destruction(T * resource)
-            {
-                if (nullptr != resource)
-                {
-                    delete resource;
-                }
-            }
-
-            template <typename T>
-            void Event_handler<T>::On_last_reference_gone(
+            virtual void On_owner_destruction(T * resource);
+            virtual void On_last_reference_gone(
                 T * resource,
-                bool & should_owner_be_destoyed)
-            {
-                should_owner_be_destoyed = true;
-            }
+                bool & should_owner_be_destoyed);
+        };
 
-            template <typename T>
-            Owner<T> * Owner<T>::Create()
-            {
-                return new Owner;
-            }
+        template <typename T>
+        class Owner
+        {
+            friend class Reference<T>
+        public:
+            static Owner * Create();
+            static Owner * Create(T * resource);
+            ~Owner();
 
-            template <typename T>
-            Owner<T> * Owner<T>::Create(T * resource)
-            {
-                return new Owner(resource);
-            }
+            void Set_event_handler(Event_handler * handler);
 
-            template <typename T>
-            Owner<T>::Owner()
-                : m_event_handler(nullptr)
-                , m_resource(nullptr)
-                , m_reference_counter(0)
-            {
-                /* Nothing to be done here */
-            }
+        private:
+            Owner();
+            Owner(T * resource);
 
-            template <typename T>
-            Owner<T>::Owner(T * resource)
-                : m_event_handler(nullptr)
-                , m_resource(resource)
-                , m_reference_counter(0)
-            {
-                /* Nothing to be done here */
-            }
+            void increase_reference_count();
+            void decrease_reference_count();
 
-            template <typename T>
-            Owner<T>::~Owner()
+            Event_handler * m_event_handler;
+            T * m_resource;
+            uint32 m_reference_counter;
+        };
+
+        template <typename T>
+        class Reference
+        {
+        public:
+            Reference();
+            Reference(T * resource);
+            Reference(const Reference & reference);
+            Reference(Reference && reference);
+            Reference & operator = (const Reference & reference);
+            Reference & operator = (Reference && reference);
+            ~Reference();
+
+            void Reset(T * resource);
+            void Release();
+
+            Owner * Get_owner();
+
+            T * operator * ();
+            const T * operator * () const;
+
+            T * operator -> ();
+            const T * operator -> () const;
+
+            T * Get();
+            const T * Get() const;
+
+        private:
+            void set(T * resource);
+
+            Owner * m_owner;
+            T * m_resource;
+        };
+
+        template <typename T>
+        void Event_handler<T>::On_owner_destruction(T * resource)
+        {
+            if (nullptr != resource)
             {
-                if (nullptr != m_resource)
+                delete resource;
+            }
+        }
+
+        template <typename T>
+        void Event_handler<T>::On_last_reference_gone(
+            T * resource,
+            bool & should_owner_be_destoyed)
+        {
+            should_owner_be_destoyed = true;
+        }
+
+        template <typename T>
+        Owner<T> * Owner<T>::Create()
+        {
+            return new Owner;
+        }
+
+        template <typename T>
+        Owner<T> * Owner<T>::Create(T * resource)
+        {
+            return new Owner(resource);
+        }
+
+        template <typename T>
+        Owner<T>::Owner()
+            : m_event_handler(nullptr)
+            , m_resource(nullptr)
+            , m_reference_counter(0)
+        {
+            /* Nothing to be done here */
+        }
+
+        template <typename T>
+        Owner<T>::Owner(T * resource)
+            : m_event_handler(nullptr)
+            , m_resource(resource)
+            , m_reference_counter(0)
+        {
+            /* Nothing to be done here */
+        }
+
+        template <typename T>
+        Owner<T>::~Owner()
+        {
+            if (nullptr != m_resource)
+            {
+                if (nullptr == m_handler)
                 {
-                    if (nullptr == m_handler)
-                    {
-                        delete m_resource;
-                    }
-                    else
-                    {
-                        m_handler->On_owner_destruction(m_resource);
-                    }
-
-                    m_resource = nullptr;
-                }
-            }
-
-            template <typename T>
-            void Owner<T>::Set_event_handler(Event_handler * handler)
-            {
-                m_handler = handler;
-            }
-
-            template <typename T>
-            void Owner<T>::increase_reference_count()
-            {
-                m_reference_counter += 1;
-            }
-
-            template <typename T>
-            void Owner<T>::decrease_reference_count()
-            {
-                if (1 == m_reference_counter)
-                {
-                    m_reference_counter = 0;
-
-                    if (nullptr == m_handler)
-                    {
-                        delete this;
-                    }
-                    else
-                    {
-                        bool should_owner_be_destroyed = true;
-
-                        m_handler->On_last_reference_gone(
-                            m_resource,
-                            should_owner_be_destroyed);
-
-                        if (true == should_owner_be_destroyed)
-                        {
-                            delete this;
-                        }
-                    }
-                }
-                else if (0 == m_reference_counter)
-                {
-                    DEBUGLOG("Something is seriously wrong with shared resource management");
-                    ASSERT(0);
+                    delete m_resource;
                 }
                 else
                 {
-                    m_reference_counter -= 1;
-                }
-            }
-
-            template <typename T>
-            Reference<T>::Reference()
-                : m_owner(nullptr)
-                , m_resource(nullptr)
-            {
-                /* Nothing to be done here */
-            }
-
-            template <typename T>
-            Reference<T>::Reference(T * resource)
-                : m_owner(nullptr)
-                , m_resource(nullptr)
-            {
-                set(resource);
-            }
-
-            template <typename T>
-            Reference<T>::Reference(const Reference & reference)
-                : m_owner(reference.m_owner)
-                , m_resource(reference.m_resource)
-            {
-                if (nullptr != m_owner)
-                {
-                    m_owner->increase_reference_count();
-                }
-            }
-
-            template <typename T>
-            Reference<T>::Reference(Reference && reference)
-                : m_owner(std::move(reference.m_owner))
-                , m_resource(std::move(reference.m_resource))
-            {
-            }
-
-            template <typename T>
-            Reference<T> & Reference<T>::operator = (const Reference & reference)
-            {
-                Release();
-
-                m_owner = reference.m_owner;
-                m_resource = reference.m_resource;
-
-                if (nullptr != m_owner)
-                {
-                    m_owner->increase_reference_count();
-                }
-            }
-
-            template <typename T>
-            Reference<T> & Reference<T>::operator = (Reference && reference)
-            {
-                Release();
-
-                m_owner = std::move(reference.m_owner);
-                m_resource = std::move(reference.m_resource);
-            }
-
-            template <typename T>
-            Reference<T>::~Reference()
-            {
-                Release();
-            }
-
-            template <typename T>
-            void Reference<T>::Reset(T * resource)
-            {
-                Release();
-
-                set(resource);
-            }
-
-            template <typename T>
-            void Reference<T>::Release()
-            {
-                if (nullptr != m_owner)
-                {
-                    m_owner->decrease_reference_count();
+                    m_handler->On_owner_destruction(m_resource);
                 }
 
-                m_owner = nullptr;
                 m_resource = nullptr;
             }
+        }
 
-            template <typename T>
-            void Reference<T>::set(T * resource)
+        template <typename T>
+        void Owner<T>::Set_event_handler(Event_handler * handler)
+        {
+            m_handler = handler;
+        }
+
+        template <typename T>
+        void Owner<T>::increase_reference_count()
+        {
+            m_reference_counter += 1;
+        }
+
+        template <typename T>
+        void Owner<T>::decrease_reference_count()
+        {
+            if (1 == m_reference_counter)
             {
-                /* Do not create infrastructure for keeping nullptr */
-                if (nullptr == resource)
+                m_reference_counter = 0;
+
+                if (nullptr == m_handler)
                 {
-                    return;
+                    delete this;
                 }
-
-                auto owner = Owner::Create(resource);
-
-                if (nullptr != owner)
+                else
                 {
-                    m_owner = owner;
-                    m_owner->increase_reference_count();
-                    m_resource = resource;
+                    bool should_owner_be_destroyed = true;
+
+                    m_handler->On_last_reference_gone(
+                        m_resource,
+                        should_owner_be_destroyed);
+
+                    if (true == should_owner_be_destroyed)
+                    {
+                        delete this;
+                    }
                 }
             }
-
-            template <typename T>
-            Owner * Reference<T>::Get_owner()
+            else if (0 == m_reference_counter)
             {
-                return m_owner;
+                DEBUGLOG("Something is seriously wrong with shared resource management");
+                ASSERT(0);
+            }
+            else
+            {
+                m_reference_counter -= 1;
+            }
+        }
+
+        template <typename T>
+        Reference<T>::Reference()
+            : m_owner(nullptr)
+            , m_resource(nullptr)
+        {
+            /* Nothing to be done here */
+        }
+
+        template <typename T>
+        Reference<T>::Reference(T * resource)
+            : m_owner(nullptr)
+            , m_resource(nullptr)
+        {
+            set(resource);
+        }
+
+        template <typename T>
+        Reference<T>::Reference(const Reference & reference)
+            : m_owner(reference.m_owner)
+            , m_resource(reference.m_resource)
+        {
+            if (nullptr != m_owner)
+            {
+                m_owner->increase_reference_count();
+            }
+        }
+
+        template <typename T>
+        Reference<T>::Reference(Reference && reference)
+            : m_owner(std::move(reference.m_owner))
+            , m_resource(std::move(reference.m_resource))
+        {
+        }
+
+        template <typename T>
+        Reference<T> & Reference<T>::operator = (const Reference & reference)
+        {
+            Release();
+
+            m_owner = reference.m_owner;
+            m_resource = reference.m_resource;
+
+            if (nullptr != m_owner)
+            {
+                m_owner->increase_reference_count();
+            }
+        }
+
+        template <typename T>
+        Reference<T> & Reference<T>::operator = (Reference && reference)
+        {
+            Release();
+
+            m_owner = std::move(reference.m_owner);
+            m_resource = std::move(reference.m_resource);
+        }
+
+        template <typename T>
+        Reference<T>::~Reference()
+        {
+            Release();
+        }
+
+        template <typename T>
+        void Reference<T>::Reset(T * resource)
+        {
+            Release();
+
+            set(resource);
+        }
+
+        template <typename T>
+        void Reference<T>::Release()
+        {
+            if (nullptr != m_owner)
+            {
+                m_owner->decrease_reference_count();
             }
 
-            template <typename T>
-            T * Reference<T>::operator * ()
-            {
-                ASSERT(nullptr != m_resource);
+            m_owner = nullptr;
+            m_resource = nullptr;
+        }
 
-                return m_resource;
+        template <typename T>
+        void Reference<T>::set(T * resource)
+        {
+            /* Do not create infrastructure for keeping nullptr */
+            if (nullptr == resource)
+            {
+                return;
             }
 
-            template <typename T>
-            const T * Reference<T>::operator * () const
+            auto owner = Owner::Create(resource);
+
+            if (nullptr != owner)
             {
-                ASSERT(nullptr != m_resource);
-
-                return m_resource;
+                m_owner = owner;
+                m_owner->increase_reference_count();
+                m_resource = resource;
             }
+        }
 
-            template <typename T>
-            T * Reference<T>::operator -> ()
-            {
-                ASSERT(nullptr != m_resource);
+        template <typename T>
+        Owner * Reference<T>::Get_owner()
+        {
+            return m_owner;
+        }
 
-                return m_resource;
-            }
+        template <typename T>
+        T * Reference<T>::operator * ()
+        {
+            ASSERT(nullptr != m_resource);
 
-            template <typename T>
-            const T * Reference<T>::operator -> () const
-            {
-                ASSERT(nullptr != m_resource);
+            return m_resource;
+        }
 
-                return m_resource;
-            }
+        template <typename T>
+        const T * Reference<T>::operator * () const
+        {
+            ASSERT(nullptr != m_resource);
 
-            template <typename T>
-            T * Reference<T>::Get()
-            {
-                ASSERT(nullptr != m_resource);
+            return m_resource;
+        }
 
-                return m_resource;
-            }
+        template <typename T>
+        T * Reference<T>::operator -> ()
+        {
+            ASSERT(nullptr != m_resource);
 
-            template <typename T>
-            const T * Reference<T>::Get() const
-            {
-                ASSERT(nullptr != m_resource);
+            return m_resource;
+        }
 
-                return m_resource;
-            }
+        template <typename T>
+        const T * Reference<T>::operator -> () const
+        {
+            ASSERT(nullptr != m_resource);
+
+            return m_resource;
+        }
+
+        template <typename T>
+        T * Reference<T>::Get()
+        {
+            ASSERT(nullptr != m_resource);
+
+            return m_resource;
+        }
+
+        template <typename T>
+        const T * Reference<T>::Get() const
+        {
+            ASSERT(nullptr != m_resource);
+
+            return m_resource;
         }
     }
 }
 
-#endif /* O8_TEMPLATES_SHAREDRESOURCE_HPP */
+#endif /* UTILITIES_CONTAINERS_SHAREDRESOURCE_HPP */

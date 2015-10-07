@@ -29,10 +29,10 @@
 * @file IntrusiveList.hpp
 **/
 
-#ifndef O8_TEMPLATES_INTRUSIVE_LIST_HPP
-#define O8_TEMPLATES_INTRUSIVE_LIST_HPP
+#ifndef UTILITIES_CONTAINERS_INTRUSIVE_LIST_HPP
+#define UTILITIES_CONTAINERS_INTRUSIVE_LIST_HPP
 
-namespace O8
+namespace Containers
 {
     namespace IntrusiveList
     {
@@ -561,4 +561,4 @@ namespace O8
     }
 }
 
-#endif /* O8_TEMPLATES_INTRUSIVE_LIST_HPP */
+#endif /* UTILITIES_CONTAINERS_INTRUSIVE_LIST_HPP */

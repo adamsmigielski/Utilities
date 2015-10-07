@@ -29,16 +29,13 @@
 * @file Hash_string.hpp
 **/
 
-#ifndef O8_UTILITY_HASH_STRING_HPP
-#define O8_UTILITY_HASH_STRING_HPP
+#ifndef UTILITIES_UTILITY_HASH_STRING_HPP
+#define UTILITIES_UTILITY_HASH_STRING_HPP
 
-namespace O8
+namespace Helpers
 {
-    namespace Utility
-    {
-        size_t Hash_string(const std::string & string);
-        size_t Hash_string(const char * string);
-    }
+    size_t Hash_string(const std::string & string);
+    size_t Hash_string(const char * string);
 }
 
-#endif /* O8_UTILITY_HASH_STRING_HPP */
+#endif /* UTILITIES_UTILITY_HASH_STRING_HPP */

@@ -29,12 +29,12 @@
 * @file MemoryAccess.hpp
 **/
 
-#ifndef O8_TEMPLATES_MEMORY_ACCESS_HPP
-#define O8_TEMPLATES_MEMORY_ACCESS_HPP
+#ifndef UTILITIES_MEMORY_MEMORYACCESS_HPP
+#define UTILITIES_MEMORY_MEMORYACCESS_HPP
 
-namespace O8
+namespace Memory
 {
-    namespace MemoryAccess
+    namespace Access
     {
         template <typename T>
         class Wrapper
@@ -370,4 +370,4 @@ namespace O8
     }
 }
 
-#endif /* O8_TEMPLATES_MEMORY_ACCESS_HPP */
+#endif /* UTILITIES_MEMORY_MEMORYACCESS_HPP */

@@ -29,18 +29,18 @@
 * @file Align.hpp
 **/
 
-#ifndef O8_COMMON_ALIGN_HPP
-#define O8_COMMON_ALIGN_HPP
+#ifndef UTILITIES_COMMON_ALIGN_HPP
+#define UTILITIES_COMMON_ALIGN_HPP
 
 
-#if O8_IS_MSVC
+#if UTILITIES_IS_MSVC
 
 #define ALIGN16 _declspec(align(16))
 
-#else /* O8_IS_MSVC */
+#else /* UTILITIES_IS_MSVC */
 
 #define ALIGN16 __attribute__ ((aligned (16)))
 
-#endif /* O8_IS_MSVC */
+#endif /* UTILITIES_IS_MSVC */
 
-#endif /* O8_COMMON_ALIGN_HPP */
+#endif /* UTILITIES_COMMON_ALIGN_HPP */

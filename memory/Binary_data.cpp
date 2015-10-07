@@ -32,118 +32,116 @@
 #include "PCH.hpp"
 #include "Binary_data.hpp"
 
-namespace O8
+namespace Memory
 {
-    namespace Utility
+    Binary_data::Binary_data()
+        : m_data(nullptr)
+        , m_size(0)
     {
-        Binary_data::Binary_data()
-            : m_data(nullptr)
-            , m_size(0)
+        /* Nothing to be done here */
+    }
+
+    Binary_data::Binary_data(uint8 * data, size_t size)
+        : m_data(data)
+        , m_size(size)
+    {
+        /* Nothing to be done here */
+    }
+
+    Binary_data::Binary_data(const Binary_data & data)
+        : m_data(nullptr)
+        , m_size(0)
+    {
+        copy(data.m_data, data.m_size);
+    }
+
+    Binary_data::Binary_data(Binary_data && data)
+        : m_data(std::move(data.m_data))
+        , m_size(std::move(data.m_size))
+    {
+        /* Nothing to be done here */
+    }
+
+    Binary_data & Binary_data::operator = (const Binary_data & data)
+    {
+        copy(data.m_data, data.m_size);
+
+        return *this;
+    }
+
+    Binary_data & Binary_data::operator = (Binary_data && data)
+    {
+        m_data = std::move(data.m_data);
+        m_size = std::move(data.m_size);
+
+        return *this;
+    }
+
+    Binary_data::~Binary_data()
+    {
+        Release();
+    }
+
+    uint8 * Binary_data::Data() const
+    {
+        return m_data;
+    }
+
+    size_t Binary_data::Size() const
+    {
+        return m_size;
+    }
+
+    uint8 & Binary_data::operator [] (size_t offset) const
+    {
+        return *(m_data + offset);
+    }
+
+    void Binary_data::Release()
+    {
+        if (nullptr != m_data)
         {
-            /* Nothing to be done here */
+            delete (char *) m_data;
+            m_data = nullptr;
         }
 
-        Binary_data::Binary_data(uint8 * data, size_t size)
-            : m_data(data)
-            , m_size(size)
+        m_size = 0;
+    }
+
+    void Binary_data::Reset(uint8 * data, size_t size)
+    {
+        Release();
+
+        m_data = data;
+        m_size = size;
+    }
+
+    bool Binary_data::Is_null() const
+    {
+        return (nullptr == m_data);
+    }
+
+    void Binary_data::copy(uint8 * data, size_t size)
+    {
+        auto ptr = new uint8[size];
+
+        if (nullptr == ptr)
         {
-            /* Nothing to be done here */
+            ERRLOG("Memory allocation failure");
+            ASSERT(0);
+            return;
         }
 
-        Binary_data::Binary_data(const Binary_data & data)
-            : m_data(nullptr)
-            , m_size(0)
-        {
-            copy(data.m_data, data.m_size);
-        }
+        memcpy(ptr, data, size);
 
-        Binary_data::Binary_data(Binary_data && data)
-            : m_data(std::move(data.m_data))
-            , m_size(std::move(data.m_size))
-        {
-            /* Nothing to be done here */
-        }
+        set(ptr, size);
+    }
 
-        Binary_data & Binary_data::operator = (const Binary_data & data)
-        {
-            copy(data.m_data, data.m_size);
+    void Binary_data::set(uint8 * data, size_t size)
+    {
+        m_data = data;
+        m_size = size;
+    }
 
-            return *this;
-        }
+} /* namespace Memory */
 
-        Binary_data & Binary_data::operator = (Binary_data && data)
-        {
-            m_data = std::move(data.m_data);
-            m_size = std::move(data.m_size);
-
-            return *this;
-        }
-
-        Binary_data::~Binary_data()
-        {
-            Release();
-        }
-
-        uint8 * Binary_data::Data() const
-        {
-            return m_data;
-        }
-
-        size_t Binary_data::Size() const
-        {
-            return m_size;
-        }
-
-        uint8 & Binary_data::operator [] (size_t offset) const
-        {
-            return *(m_data + offset);
-        }
-
-        void Binary_data::Release()
-        {
-            if (nullptr != m_data)
-            {
-                delete (char *) m_data;
-                m_data = nullptr;
-            }
-
-            m_size = 0;
-        }
-
-        void Binary_data::Reset(uint8 * data, size_t size)
-        {
-            Release();
-
-            m_data = data;
-            m_size = size;
-        }
-
-        bool Binary_data::Is_null() const
-        {
-            return (nullptr == m_data);
-        }
-
-        void Binary_data::copy(uint8 * data, size_t size)
-        {
-            auto ptr = new uint8[size];
-
-            if (nullptr == ptr)
-            {
-                ERRLOG("Memory allocation failure");
-                ASSERT(0);
-                return;
-            }
-
-            memcpy(ptr, data, size);
-
-            set(ptr, size);
-        }
-
-        void Binary_data::set(uint8 * data, size_t size)
-        {
-            m_data = data;
-            m_size = size;
-        }
-
-    } /* namespace Utility */
-} /* namespace Ozone */

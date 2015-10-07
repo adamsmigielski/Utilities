@@ -33,7 +33,7 @@
 
 #include "ReferenceCounted.hpp"
 
-namespace O8
+namespace Containers
 {
     namespace ReferenceCounted
     {

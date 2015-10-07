@@ -29,159 +29,156 @@
  * @file Quaternion.hpp
  **/
 
-#ifndef O8_MATH_QUATERNION_HPP
-#define O8_MATH_QUATERNION_HPP
+#ifndef UTILITIES_MATH_QUATERNION_HPP
+#define UTILITIES_MATH_QUATERNION_HPP
 
 #include "Float4.hpp"
 #include <math.h>
 
-namespace O8
+namespace Math
 {
-	namespace Math
+	namespace Quaternion
 	{
-		namespace Quaternion
+		inline float4 Make(float j, float x, float y, float z)
 		{
-			inline float4 Make(float j, float x, float y, float z)
-			{
-				float4 res;
+			float4 res;
 
-				float rad = j / 2.0f;
-				float sinVal = sin(rad);
+			float rad = j / 2.0f;
+			float sinVal = sin(rad);
 
-				res = Float4::Set(x, y, z, 0.0f);
+			res = Float4::Set(x, y, z, 0.0f);
 				
-				res = res * sinVal;
-				res.w = cos(rad);
+			res = res * sinVal;
+			res.w = cos(rad);
 
-				res = Normalise(res);
+			res = Normalise(res);
 
-				return res;
-			}
+			return res;
+		}
 
-			inline float4 Make(float j, const float4 & axis)
-			{
-				float4 res;
+		inline float4 Make(float j, const float4 & axis)
+		{
+			float4 res;
 
-				float rad = j / 2.0f;
-				float sinVal = sin(rad);
+			float rad = j / 2.0f;
+			float sinVal = sin(rad);
 				
-				res = axis * sinVal;
-				res.w = cos(rad);
+			res = axis * sinVal;
+			res.w = cos(rad);
 
-				res = Normalise(res);
+			res = Normalise(res);
 
-				return res;
-			}
+			return res;
+		}
 
-			inline float4 MakeFromPoint(const float4 & point)
-			{
-				float4 res;
+		inline float4 MakeFromPoint(const float4 & point)
+		{
+			float4 res;
 
-				res.m128 = point.m128;
-				res.w = 0.0f;
+			res.m128 = point.m128;
+			res.w = 0.0f;
 
-				return res;
-			}
+			return res;
+		}
 			
-			static const float4 i = {{1.0f, 0.0f, 0.0f, 0.0f}};
-			static const float4 j = {{0.0f, 1.0f, 0.0f, 0.0f}};
-			static const float4 k = {{0.0f, 0.0f, 1.0f, 0.0f}};
-			static const float4 one = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		static const float4 i = {{1.0f, 0.0f, 0.0f, 0.0f}};
+		static const float4 j = {{0.0f, 1.0f, 0.0f, 0.0f}};
+		static const float4 k = {{0.0f, 0.0f, 1.0f, 0.0f}};
+		static const float4 one = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
-			inline float4 I()
-			{
-				return i;
-			}
+		inline float4 I()
+		{
+			return i;
+		}
 
-			inline float4 J()
-			{
-				return j;
-			}
+		inline float4 J()
+		{
+			return j;
+		}
 
-			inline float4 K()
-			{
-				return k;
-			}
+		inline float4 K()
+		{
+			return k;
+		}
 
-			inline float4 One()
-			{
-				return one;
-			}
+		inline float4 One()
+		{
+			return one;
+		}
 
-			/*
-			xx, yx, zx, jx
-			xy, yy, zy, jy
-			xz, yz, zz, jz
-			xj, yj, zj, jj
-			*/
-			static const float4 multiplyHelperX = {{-1.0f, -1.0f, 1.0f, 1.0f}};
-			static const float4 multiplyHelperY = {{1.0f, -1.0f, -1.0f, 1.0f}};
-			static const float4 multiplyHelperZ = {{-1.0f, 1.0f, -1.0f, 1.0f}};
+		/*
+		xx, yx, zx, jx
+		xy, yy, zy, jy
+		xz, yz, zz, jz
+		xj, yj, zj, jj
+		*/
+		static const float4 multiplyHelperX = {{-1.0f, -1.0f, 1.0f, 1.0f}};
+		static const float4 multiplyHelperY = {{1.0f, -1.0f, -1.0f, 1.0f}};
+		static const float4 multiplyHelperZ = {{-1.0f, 1.0f, -1.0f, 1.0f}};
 
-			inline float4 Multiply(const float4 & a, const float4 & b)
-			{
-				float4 res, temp1, temp2, temp3, temp4;
+		inline float4 Multiply(const float4 & a, const float4 & b)
+		{
+			float4 res, temp1, temp2, temp3, temp4;
 				
-				temp1.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(0, 0, 0, 0));
-				temp1.m128 = _mm_mul_ps(a.m128, temp1.m128);
-				temp1.m128 = _mm_mul_ps(multiplyHelperX.m128, temp1.m128);
-				temp1.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(0, 1, 2, 3));
+			temp1.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(0, 0, 0, 0));
+			temp1.m128 = _mm_mul_ps(a.m128, temp1.m128);
+			temp1.m128 = _mm_mul_ps(multiplyHelperX.m128, temp1.m128);
+			temp1.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(0, 1, 2, 3));
 
-				temp2.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(1, 1, 1, 1));
-				temp2.m128 = _mm_mul_ps(a.m128, temp2.m128);
-				temp2.m128 = _mm_mul_ps(multiplyHelperY.m128, temp2.m128);
-				temp2.m128 = _mm_shuffle_ps(temp2.m128, temp2.m128, _MM_SHUFFLE(1, 0, 3, 2));
-				res.m128 = _mm_add_ps(temp1.m128, temp2.m128);
+			temp2.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(1, 1, 1, 1));
+			temp2.m128 = _mm_mul_ps(a.m128, temp2.m128);
+			temp2.m128 = _mm_mul_ps(multiplyHelperY.m128, temp2.m128);
+			temp2.m128 = _mm_shuffle_ps(temp2.m128, temp2.m128, _MM_SHUFFLE(1, 0, 3, 2));
+			res.m128 = _mm_add_ps(temp1.m128, temp2.m128);
 
-				temp3.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(2, 2, 2, 2));
-				temp3.m128 = _mm_mul_ps(a.m128, temp3.m128);
-				temp3.m128 = _mm_mul_ps(multiplyHelperZ.m128, temp3.m128);
-				temp3.m128 = _mm_shuffle_ps(temp3.m128, temp3.m128, _MM_SHUFFLE(2, 3, 0, 1));
-				res.m128 = _mm_add_ps(res.m128, temp3.m128);
+			temp3.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(2, 2, 2, 2));
+			temp3.m128 = _mm_mul_ps(a.m128, temp3.m128);
+			temp3.m128 = _mm_mul_ps(multiplyHelperZ.m128, temp3.m128);
+			temp3.m128 = _mm_shuffle_ps(temp3.m128, temp3.m128, _MM_SHUFFLE(2, 3, 0, 1));
+			res.m128 = _mm_add_ps(res.m128, temp3.m128);
 
-				temp4.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 3, 3, 3));
-				temp4.m128 = _mm_mul_ps(a.m128, temp4.m128);
-				res.m128 = _mm_add_ps(res.m128, temp4.m128);				
+			temp4.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 3, 3, 3));
+			temp4.m128 = _mm_mul_ps(a.m128, temp4.m128);
+			res.m128 = _mm_add_ps(res.m128, temp4.m128);				
 								
 
-				return res;
-			}
+			return res;
+		}
 
-			static const float4 inverseHelper = {{-1.0f, -1.0f, -1.0f, 1.0f}};
+		static const float4 inverseHelper = {{-1.0f, -1.0f, -1.0f, 1.0f}};
 
-			inline float4 Inverse(const float4 & a)
-			{
-				float4 res;
+		inline float4 Inverse(const float4 & a)
+		{
+			float4 res;
 
-				res.m128 = _mm_mul_ps(a.m128, inverseHelper.m128);
+			res.m128 = _mm_mul_ps(a.m128, inverseHelper.m128);
 
-				return res;
-			}
+			return res;
+		}
 
-			inline float4 Rotate(const float4 & point, const float4 & quaternion)
-			{
-				float4 res, inv, temp;
+		inline float4 Rotate(const float4 & point, const float4 & quaternion)
+		{
+			float4 res, inv, temp;
 
-				inv = Inverse(quaternion);
-				temp = MakeFromPoint(point);
+			inv = Inverse(quaternion);
+			temp = MakeFromPoint(point);
 				
-				res = Multiply(Multiply(quaternion, temp), inv);
+			res = Multiply(Multiply(quaternion, temp), inv);
 				
-				return res;
-			}
+			return res;
+		}
 
-			inline float4 NLerp(const float4 & a, const float4 & b, const float4 & percent)
-			{
-				float4 res, temp;
+		inline float4 NLerp(const float4 & a, const float4 & b, const float4 & percent)
+		{
+			float4 res, temp;
 
-				temp = Lerp(a, b, percent);
+			temp = Lerp(a, b, percent);
 
-				res = Normalise(temp);
+			res = Normalise(temp);
 
-				return res;
-			}
+			return res;
 		}
 	}
 }
 
-#endif /* O8_MATH_QUATERNION_HPP */
+#endif /* UTILITIES_MATH_QUATERNION_HPP */

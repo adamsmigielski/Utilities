@@ -29,47 +29,44 @@
 * @file Binary_data.hpp
 **/
 
-#ifndef O8_UTILITY_BINARYDATA_HPP
-#define O8_UTILITY_BINARYDATA_HPP
+#ifndef UTILITIES_MEMORY_BINARYDATA_HPP
+#define UTILITIES_MEMORY_BINARYDATA_HPP
 
-namespace O8
+namespace Memory
 {
-    namespace Utility
+    class Binary_data
     {
-        class Binary_data
-        {
-        public:
-            Binary_data();
-            Binary_data(uint8 * data, size_t size);
-            Binary_data(const Binary_data & data);
-            Binary_data(Binary_data && data);
-            Binary_data & operator = (const Binary_data & data);
-            Binary_data & operator = (Binary_data && data);
-            ~Binary_data();
+    public:
+        Binary_data();
+        Binary_data(uint8 * data, size_t size);
+        Binary_data(const Binary_data & data);
+        Binary_data(Binary_data && data);
+        Binary_data & operator = (const Binary_data & data);
+        Binary_data & operator = (Binary_data && data);
+        ~Binary_data();
 
 
-            uint8 * Data() const;
-            size_t Size() const;
-            uint8 & operator [] (size_t offset) const;
+        uint8 * Data() const;
+        size_t Size() const;
+        uint8 & operator [] (size_t offset) const;
 
-            int32 Copy_range(
-                const Binary_data & data,
-                size_t offset,
-                size_t size);
-            void Release();
-            void Reset(uint8 * data, size_t size);
+        int32 Copy_range(
+            const Binary_data & data,
+            size_t offset,
+            size_t size);
+        void Release();
+        void Reset(uint8 * data, size_t size);
 
-            bool Is_null() const;
+        bool Is_null() const;
 
-        private:
-            void copy(uint8 * data, size_t size);
-            void set(uint8 * data, size_t size);
+    private:
+        void copy(uint8 * data, size_t size);
+        void set(uint8 * data, size_t size);
 
-            uint8 * m_data;
-            size_t m_size;
-        };
+        uint8 * m_data;
+        size_t m_size;
+    };
 
-    } /* namespace Utility */
-} /* namespace O8 */
+} /* namespace Memory */
 
-#endif /* O8_UTILITY_BINARYDATA_HPP */
+#endif /* UTILITIES_MEMORY_BINARYDATA_HPP */

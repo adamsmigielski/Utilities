@@ -29,218 +29,218 @@
 * @file ReferenceCounted.hpp
 **/
 
-#ifndef O8_TEMPLATES_REFERENCECOUNTED_HPP
-#define O8_TEMPLATES_REFERENCECOUNTED_HPP
+#ifndef UTILITIES_CONTAINERS_REFERENCECOUNTED_HPP
+#define UTILITIES_CONTAINERS_REFERENCECOUNTED_HPP
 
-namespace O8
+namespace Containers
 {
-    namespace ReferenceCounted
-    {
-        class Resource;
+	namespace ReferenceCounted
+	{
+		class Resource;
 
-        class Event_handler
-        {
-        public:
-            virtual ~Event_handler()
-            {
-            }
+		class Event_handler
+		{
+		public:
+			virtual ~Event_handler()
+			{
+			}
 
-            virtual void On_resource_destruction(Resource * resource);
-            virtual void On_last_reference_gone(
-                Resource * resource,
-                bool & should_resource_be_destoyed);
-        };
+			virtual void On_resource_destruction(Resource * resource);
+			virtual void On_last_reference_gone(
+				Resource * resource,
+				bool & should_resource_be_destoyed);
+		};
 
-        class Resource
-        {
-            template <typename T>
-            friend class Reference;
+		class Resource
+		{
+			template <typename T>
+			friend class Reference;
 
-        public:
-            virtual ~Resource();
+		public:
+			virtual ~Resource();
 
-            void Set_event_handler(Event_handler * handler);
+			void Set_event_handler(Event_handler * handler);
 
-        protected:
-            Resource();
+		protected:
+			Resource();
 
-        private:
-            void increase_reference_count();
-            void decrease_reference_count();
+		private:
+			void increase_reference_count();
+			void decrease_reference_count();
 
-            Event_handler * m_event_handler;
-            uint32 m_reference_counter;
-        };
+			Event_handler * m_event_handler;
+			uint32 m_reference_counter;
+		};
 
-        template <typename T>
-        class Reference
-        {
-        public:
-            Reference();
-            Reference(T * resource);
-            Reference(const Reference & reference);
-            Reference(Reference && reference);
-            Reference & operator = (const Reference & reference);
-            Reference & operator = (Reference && reference);
-            ~Reference();
+		template <typename T>
+		class Reference
+		{
+		public:
+			Reference();
+			Reference(T * resource);
+			Reference(const Reference & reference);
+			Reference(Reference && reference);
+			Reference & operator = (const Reference & reference);
+			Reference & operator = (Reference && reference);
+			~Reference();
 
-            void Reset(T * resource);
-            void Release();
+			void Reset(T * resource);
+			void Release();
 
-            T * operator * ();
-            const T * operator * () const;
+			T * operator * ();
+			const T * operator * () const;
 
-            T * operator -> ();
-            const T * operator -> () const;
+			T * operator -> ();
+			const T * operator -> () const;
 
-            T * Get();
-            const T * Get() const;
+			T * Get();
+			const T * Get() const;
 
-        private:
-            void set(T * resource);
+		private:
+			void set(T * resource);
 
-            T * m_resource;
-        };
+			T * m_resource;
+		};
 
 
 
-        template <typename T>
-        Reference<T>::Reference()
-            : m_resource(nullptr)
-        {
-            /* Nothing to be done here */
-        }
+		template <typename T>
+		Reference<T>::Reference()
+			: m_resource(nullptr)
+		{
+			/* Nothing to be done here */
+		}
 
-        template <typename T>
-        Reference<T>::Reference(T * resource)
-            : m_resource(nullptr)
-        {
-            set(resource);
-        }
+		template <typename T>
+		Reference<T>::Reference(T * resource)
+			: m_resource(nullptr)
+		{
+			set(resource);
+		}
 
-        template <typename T>
-        Reference<T>::Reference(const Reference & reference)
-            : m_resource(reference.m_resource)
-        {
-            if (nullptr != m_resource)
-            {
-                m_resource->increase_reference_count();
-            }
-        }
+		template <typename T>
+		Reference<T>::Reference(const Reference & reference)
+			: m_resource(reference.m_resource)
+		{
+			if (nullptr != m_resource)
+			{
+				m_resource->increase_reference_count();
+			}
+		}
 
-        template <typename T>
-        Reference<T>::Reference(Reference && reference)
-            : m_resource(std::move(reference.m_resource))
-        {
-        }
+		template <typename T>
+		Reference<T>::Reference(Reference && reference)
+			: m_resource(std::move(reference.m_resource))
+		{
+		}
 
-        template <typename T>
-        Reference<T> & Reference<T>::operator = (const Reference & reference)
-        {
-            Release();
+		template <typename T>
+		Reference<T> & Reference<T>::operator = (const Reference & reference)
+		{
+			Release();
 
-            m_resource = reference.m_resource;
+			m_resource = reference.m_resource;
 
-            if (nullptr != m_resource)
-            {
-                m_resource->increase_reference_count();
-            }
+			if (nullptr != m_resource)
+			{
+				m_resource->increase_reference_count();
+			}
 
-            return *this;
-        }
+			return *this;
+		}
 
-        template <typename T>
-        Reference<T> & Reference<T>::operator = (Reference && reference)
-        {
-            Release();
+		template <typename T>
+		Reference<T> & Reference<T>::operator = (Reference && reference)
+		{
+			Release();
 
-            m_resource = std::move(reference.m_resource);
-        }
+			m_resource = std::move(reference.m_resource);
+		}
 
-        template <typename T>
-        Reference<T>::~Reference()
-        {
-            Release();
-        }
+		template <typename T>
+		Reference<T>::~Reference()
+		{
+			Release();
+		}
 
-        template <typename T>
-        void Reference<T>::Reset(T * resource)
-        {
-            Release();
+		template <typename T>
+		void Reference<T>::Reset(T * resource)
+		{
+			Release();
 
-            set(resource);
-        }
+			set(resource);
+		}
 
-        template <typename T>
-        void Reference<T>::Release()
-        {
-            if (nullptr != m_resource)
-            {
-                m_resource->decrease_reference_count();
-                m_resource = nullptr;
-            }
-        }
+		template <typename T>
+		void Reference<T>::Release()
+		{
+			if (nullptr != m_resource)
+			{
+				m_resource->decrease_reference_count();
+				m_resource = nullptr;
+			}
+		}
 
-        template <typename T>
-        void Reference<T>::set(T * resource)
-        {
-            if (nullptr == resource)
-            {
-                return;
-            }
+		template <typename T>
+		void Reference<T>::set(T * resource)
+		{
+			if (nullptr == resource)
+			{
+				return;
+			}
 
-            m_resource->increase_reference_count();
-            m_resource = resource;
-        }
+			m_resource->increase_reference_count();
+			m_resource = resource;
+		}
 
-        template <typename T>
-        T * Reference<T>::operator * ()
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		T * Reference<T>::operator * ()
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
+			return m_resource;
+		}
 
-        template <typename T>
-        const T * Reference<T>::operator * () const
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		const T * Reference<T>::operator * () const
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
+			return m_resource;
+		}
 
-        template <typename T>
-        T * Reference<T>::operator -> ()
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		T * Reference<T>::operator -> ()
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
+			return m_resource;
+		}
 
-        template <typename T>
-        const T * Reference<T>::operator -> () const
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		const T * Reference<T>::operator -> () const
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
+			return m_resource;
+		}
 
-        template <typename T>
-        T * Reference<T>::Get()
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		T * Reference<T>::Get()
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
+			return m_resource;
+		}
 
-        template <typename T>
-        const T * Reference<T>::Get() const
-        {
-            ASSERT(nullptr != m_resource);
+		template <typename T>
+		const T * Reference<T>::Get() const
+		{
+			ASSERT(nullptr != m_resource);
 
-            return m_resource;
-        }
-    }
+			return m_resource;
+		}
+	}
 }
 
-#endif /* O8_TEMPLATES_REFERENCECOUNTED_HPP */
+#endif /* UTILITIES_CONTAINERS_REFERENCECOUNTED_HPP */

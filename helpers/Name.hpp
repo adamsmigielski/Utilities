@@ -29,8 +29,8 @@
 * @file Name.hpp
 **/
 
-#ifndef O8_UTILITY_NAME_HPP
-#define O8_UTILITY_NAME_HPP
+#ifndef UTILITIES_UTILITY_NAME_HPP
+#define UTILITIES_UTILITY_NAME_HPP
 
 namespace O8
 {
@@ -90,4 +90,4 @@ namespace O8
     }
 }
 
-#endif O8_UTILITY_NAME_HPP
+#endif UTILITIES_UTILITY_NAME_HPP

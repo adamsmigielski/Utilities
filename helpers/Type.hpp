@@ -29,51 +29,49 @@
 * @file Type.hpp
 **/
 
-#ifndef O8_TEMPLATES_TYPE_HPP
-#define O8_TEMPLATES_TYPE_HPP
+#ifndef UTILITIES_TEMPLATES_TYPE_HPP
+#define UTILITIES_TEMPLATES_TYPE_HPP
 
-namespace O8
+namespace Helpers
 {
-    namespace Templates
+    template <class T>
+    class Type
     {
-        namespace Utilities
-        {
-            template <class T>
-            class Type
-            {
-            public:
-                typedef T value_type;
-                typedef value_type * pointer;
-                typedef value_type & reference;
-                typedef const pointer const_pointer;
-				typedef const reference & const_reference;
-				typedef pointer & pointer_reference;
-				typedef const_pointer & const_pointer_reference;
-            };
+    public:
+        typedef T value_type;
+        typedef value_type * pointer;
+        typedef value_type & reference;
+        typedef const pointer const_pointer;
+		typedef const reference & const_reference;
+		typedef pointer & pointer_reference;
+		typedef const_pointer & const_pointer_reference;
+    };
 
-            template <class T>
-            class Type<T*>
-            {
-            public:
-                typedef T value_type;
-                typedef value_type * pointer;
-                typedef value_type & reference;
-                typedef const pointer const_pointer;
-                typedef const reference & const_reference;
-            };
+    template <class T>
+    class Type<T*>
+    {
+    public:
+        typedef T value_type;
+        typedef value_type * pointer;
+        typedef value_type & reference;
+        typedef const pointer const_pointer;
+		typedef const reference & const_reference;
+		typedef pointer & pointer_reference;
+		typedef const_pointer & const_pointer_reference;
+    };
 
-            template <class T>
-            class Type<T&>
-            {
-            public:
-                typedef T value_type;
-                typedef value_type * pointer;
-                typedef value_type & reference;
-                typedef const pointer const_pointer;
-                typedef const reference & const_reference;
-            };
-        }
-    }
+    template <class T>
+    class Type<T&>
+    {
+    public:
+        typedef T value_type;
+        typedef value_type * pointer;
+        typedef value_type & reference;
+        typedef const pointer const_pointer;
+		typedef const reference & const_reference;
+		typedef pointer & pointer_reference;
+		typedef const_pointer & const_pointer_reference;
+    };
 }
 
-#endif O8_TEMPLATES_TYPE_HPP
+#endif UTILITIES_TEMPLATES_TYPE_HPP

@@ -29,7 +29,7 @@
  * @file PCH.hpp
  **/
 
-#ifndef O8_MATH_PCH
-#define O8_MATH_PCH
+#ifndef UTILITIES_MATH_PCH
+#define UTILITIES_MATH_PCH
 
-#endif /* O8_MATH_PCH */
+#endif /* UTILITIES_MATH_PCH */

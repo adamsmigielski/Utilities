@@ -33,23 +33,20 @@
 
 #include "Hash_string.hpp"
 
-namespace O8
+namespace Helpers
 {
-    namespace Utility
+    std::hash<std::string> _string_hashing;
+
+    size_t Hash_string(const std::string & string)
     {
-        std::hash<std::string> _string_hashing;
+        return _string_hashing(string);
+    }
 
-        size_t Hash_string(const std::string & string)
-        {
-            return _string_hashing(string);
-        }
+    size_t Hash_string(const char * string)
+    {
+        std::string str(string);
 
-        size_t Hash_string(const char * string)
-        {
-            std::string str(string);
-
-            return _string_hashing(str);
-        }
+        return _string_hashing(str);
     }
 }
 

@@ -29,10 +29,10 @@
 * @file BreakToDebug.hpp
 **/
 
-#ifndef O8_COMMON_BREAK_TO_DEBUG_HPP
-#define O8_COMMON_BREAK_TO_DEBUG_HPP
+#ifndef UTILITIES_COMMON_BREAK_TO_DEBUG_HPP
+#define UTILITIES_COMMON_BREAK_TO_DEBUG_HPP
 
-#if O8_IS_MSVC
+#if UTILITIES_IS_MSVC
 
 #define BREAK_TO_DEBUG __debugbreak()
 
@@ -42,4 +42,4 @@
 
 #endif
 
-#endif /* O8_COMMON_BREAK_TO_DEBUG_HPP */
+#endif /* UTILITIES_COMMON_BREAK_TO_DEBUG_HPP */

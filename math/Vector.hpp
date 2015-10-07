@@ -29,65 +29,62 @@
  * @file Vector.hpp
  **/
 
-#ifndef O8_MATH_VECTOR_HPP
-#define O8_MATH_VECTOR_HPP
+#ifndef UTILITIES_MATH_VECTOR_HPP
+#define UTILITIES_MATH_VECTOR_HPP
 
 #include "Float4.hpp"
 
-namespace O8
+namespace Math
 {
-	namespace Math
+	namespace Vector
 	{
-		namespace Vector
+		inline float Dot(const float4 & a, const float4 & b)
 		{
-			inline float Dot(const float4 & a, const float4 & b)
-			{
-				float4 res1, res2;
+			float4 res1, res2;
 
-				res1.m128 = _mm_mul_ps(a.m128, b.m128);
+			res1.m128 = _mm_mul_ps(a.m128, b.m128);
 			
-				//res1 = x, y, z, w
-				//res2 = z, w, #, #
-				res2.m128 = _mm_shuffle_ps(res1.m128, b.m128, _MM_SHUFFLE(0, 0, 3, 2));
+			//res1 = x, y, z, w
+			//res2 = z, w, #, #
+			res2.m128 = _mm_shuffle_ps(res1.m128, b.m128, _MM_SHUFFLE(0, 0, 3, 2));
 
-				//res1 = x + z, y + w, z + #, w + #
-				//res2 = z, w, #, #
-				res1.m128 = _mm_add_ps(res1.m128, res2.m128);
+			//res1 = x + z, y + w, z + #, w + #
+			//res2 = z, w, #, #
+			res1.m128 = _mm_add_ps(res1.m128, res2.m128);
 
-				//res1 = x + z, y + w, z + #, w + #
- 				//res2 = y + w, #, #, #
-				res2.m128 = _mm_shuffle_ps(res1.m128, b.m128, _MM_SHUFFLE(0, 0, 0, 1));
+			//res1 = x + z, y + w, z + #, w + #
+ 			//res2 = y + w, #, #, #
+			res2.m128 = _mm_shuffle_ps(res1.m128, b.m128, _MM_SHUFFLE(0, 0, 0, 1));
 
-				//res1 = x + z + y + w, #, #, #
-				res1.m128 = _mm_add_ps(res1.m128, res2.m128);
+			//res1 = x + z + y + w, #, #, #
+			res1.m128 = _mm_add_ps(res1.m128, res2.m128);
 
-				return res1.x;
-			}
+			return res1.x;
+		}
 
-			inline float4 Cross(const float4 & a, const float4 & b)
-			{
+		inline float4 Cross(const float4 & a, const float4 & b)
+		{
 				
-				float4 temp1, temp2, res;
+			float4 temp1, temp2, res;
 			
-				temp1.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 0, 2, 1)); //y, z, x
-				temp2.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 1, 0, 2)); //z, x, y
-				temp1.m128 = _mm_mul_ps(a.m128, temp1.m128);
-				temp2.m128 = _mm_mul_ps(b.m128, temp2.m128);
+			temp1.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 0, 2, 1)); //y, z, x
+			temp2.m128 = _mm_shuffle_ps(b.m128, b.m128, _MM_SHUFFLE(3, 1, 0, 2)); //z, x, y
+			temp1.m128 = _mm_mul_ps(a.m128, temp1.m128);
+			temp2.m128 = _mm_mul_ps(b.m128, temp2.m128);
 			
 
-				temp1.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(3, 0, 2, 1)); //y, z, x
-				temp2.m128 = _mm_shuffle_ps(temp2.m128, temp2.m128, _MM_SHUFFLE(3, 1, 0, 2)); //z, x, y
+			temp1.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(3, 0, 2, 1)); //y, z, x
+			temp2.m128 = _mm_shuffle_ps(temp2.m128, temp2.m128, _MM_SHUFFLE(3, 1, 0, 2)); //z, x, y
 
 
 
-				res.m128 = _mm_sub_ps(temp1.m128, temp2.m128);
+			res.m128 = _mm_sub_ps(temp1.m128, temp2.m128);
 
-				//#, ay * bz
+			//#, ay * bz
 
-				return res;
-			}
+			return res;
 		}
 	}
 }
 
-#endif /* O8_MATH_VECTOR_HPP */
+#endif /* UTILITIES_MATH_VECTOR_HPP */

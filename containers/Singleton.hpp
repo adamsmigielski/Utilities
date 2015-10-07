@@ -29,58 +29,52 @@
 * @file Singleton.hpp
 **/
 
-#ifndef O8_TEMPLATES_SINGLETON_HPP
-#define O8_TEMPLATES_SINGLETON_HPP
+#ifndef UTILITIES_CONTAINERS_SINGLETON_HPP
+#define UTILITIES_CONTAINERS_SINGLETON_HPP
 
-namespace O8
+namespace Containers
 {
-    namespace Templates
+    template <class T>
+    class Singleton
     {
-        namespace Containers
-        {
-            template <class T>
-            class Singleton
-            {
-            public:
-                typedef T value_type;
-                typedef T * pointer;
+    public:
+        typedef T value_type;
+        typedef T * pointer;
 
-                Singleton();
-                virtual ~Singleton();
+        Singleton();
+        virtual ~Singleton();
 
-                static typename pointer Get_singleton();
+        static typename pointer Get_singleton();
 
-            private:
-                static typename pointer s_singleton;
-            };
+    private:
+        static typename pointer s_singleton;
+    };
 
-            template <class T>
-            Singleton<T>::Singleton()
-            {
-                s_singleton = (pointer) this;
-            }
-
-            template <class T>
-            Singleton<T>::~Singleton()
-            {
-                s_singleton = nullptr;
-            }
-
-            template <class T>
-            typename Singleton<T>::pointer Singleton<T>::Get_singleton()
-            {
-                if (nullptr == s_singleton)
-                {
-                    new T;
-                }
-
-                return s_singleton;
-            }
-
-            template <class T>
-            typename Singleton<T>::pointer Singleton<T>::s_singleton = nullptr;
-        }
+    template <class T>
+    Singleton<T>::Singleton()
+    {
+        s_singleton = (pointer) this;
     }
+
+    template <class T>
+    Singleton<T>::~Singleton()
+    {
+        s_singleton = nullptr;
+    }
+
+    template <class T>
+    typename Singleton<T>::pointer Singleton<T>::Get_singleton()
+    {
+        if (nullptr == s_singleton)
+        {
+            new T;
+        }
+
+        return s_singleton;
+    }
+
+    template <class T>
+    typename Singleton<T>::pointer Singleton<T>::s_singleton = nullptr;
 }
 
-#endif /* O8_TEMPLATES_SINGLETON_HPP */
+#endif /* UTILITIES_CONTAINERS_SINGLETON_HPP */

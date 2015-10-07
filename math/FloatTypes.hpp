@@ -29,153 +29,150 @@
  * @file FloatTypes.hpp
  **/
 
-#ifndef O8_MATH_FLOATTYPES_HPP
-#define O8_MATH_FLOATTYPES_HPP
+#ifndef UTILITIES_MATH_FLOATTYPES_HPP
+#define UTILITIES_MATH_FLOATTYPES_HPP
 
-#include <O8\Common\Align.hpp>
+#include <Utilities\common\Align.hpp>
 #include <xmmintrin.h>
 
-namespace O8
+namespace Math
 {
-	namespace Math
+	union ALIGN16 float4
 	{
-		union ALIGN16 float4
+		float f[4];
+
+		struct
 		{
-			float f[4];
-
-			struct
-			{
-				float x;
-				float y;
-				float z;
-				float w;
-			};
-
-			struct
-			{
-				float _1;
-				float _2;
-				float _3;
-				float _4;
-			};
-
-			__m128 m128;
+			float x;
+			float y;
+			float z;
+			float w;
 		};
 
-
-		union ALIGN16 float12
+		struct
 		{
-			float f[12];
-
-			struct
-			{
-				float xx;
-				float xy;
-				float xz;
-				float xw;
-				float yx;
-				float yy;
-				float yz;
-				float yw;
-				float zx;
-				float zy;
-				float zz;
-				float zw;
-			};
-
-			struct
-			{
-				float _11;
-				float _12;
-				float _13;
-				float _14;
-				float _21;
-				float _22;
-				float _23;
-				float _24;
-				float _31;
-				float _32;
-				float _33;
-				float _34;
-			};
-
-			struct
-			{
-				float4 x;
-				float4 y;
-				float4 z;
-			};
-
-			struct
-			{
-				float4 _1;
-				float4 _2;
-				float4 _3;
-			};
+			float _1;
+			float _2;
+			float _3;
+			float _4;
 		};
 
+		__m128 m128;
+	};
 
-		union ALIGN16 float16
+
+	union ALIGN16 float12
+	{
+		float f[12];
+
+		struct
 		{
-			float f[16];
-
-			struct
-			{
-				float xx;
-				float xy;
-				float xz;
-				float xw;
-				float yx;
-				float yy;
-				float yz;
-				float yw;
-				float zx;
-				float zy;
-				float zz;
-				float zw;
-				float wx;
-				float wy;
-				float wz;
-				float ww;
-			};
-
-			struct
-			{
-				float _11;
-				float _12;
-				float _13;
-				float _14;
-				float _21;
-				float _22;
-				float _23;
-				float _24;
-				float _31;
-				float _32;
-				float _33;
-				float _34;
-				float _41;
-				float _42;
-				float _43;
-				float _44;
-			};
-
-			struct
-			{
-				float4 x;
-				float4 y;
-				float4 z;
-				float4 w;
-			};
-
-			struct
-			{
-				float4 _1;
-				float4 _2;
-				float4 _3;
-				float4 _4;
-			};
+			float xx;
+			float xy;
+			float xz;
+			float xw;
+			float yx;
+			float yy;
+			float yz;
+			float yw;
+			float zx;
+			float zy;
+			float zz;
+			float zw;
 		};
-	}
+
+		struct
+		{
+			float _11;
+			float _12;
+			float _13;
+			float _14;
+			float _21;
+			float _22;
+			float _23;
+			float _24;
+			float _31;
+			float _32;
+			float _33;
+			float _34;
+		};
+
+		struct
+		{
+			float4 x;
+			float4 y;
+			float4 z;
+		};
+
+		struct
+		{
+			float4 _1;
+			float4 _2;
+			float4 _3;
+		};
+	};
+
+
+	union ALIGN16 float16
+	{
+		float f[16];
+
+		struct
+		{
+			float xx;
+			float xy;
+			float xz;
+			float xw;
+			float yx;
+			float yy;
+			float yz;
+			float yw;
+			float zx;
+			float zy;
+			float zz;
+			float zw;
+			float wx;
+			float wy;
+			float wz;
+			float ww;
+		};
+
+		struct
+		{
+			float _11;
+			float _12;
+			float _13;
+			float _14;
+			float _21;
+			float _22;
+			float _23;
+			float _24;
+			float _31;
+			float _32;
+			float _33;
+			float _34;
+			float _41;
+			float _42;
+			float _43;
+			float _44;
+		};
+
+		struct
+		{
+			float4 x;
+			float4 y;
+			float4 z;
+			float4 w;
+		};
+
+		struct
+		{
+			float4 _1;
+			float4 _2;
+			float4 _3;
+			float4 _4;
+		};
+	};
 }
 
-#endif /* O8_MATH_FLOATTYPES_HPP */
+#endif /* UTILITIES_MATH_FLOATTYPES_HPP */

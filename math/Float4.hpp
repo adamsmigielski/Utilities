@@ -29,158 +29,155 @@
  * @file Float4.hpp
  **/
 
-#ifndef O8_MATH_FLOAT4_HPP
-#define O8_MATH_FLOAT4_HPP
+#ifndef UTILITIES_MATH_FLOAT4_HPP
+#define UTILITIES_MATH_FLOAT4_HPP
 
 #include "FloatTypes.hpp"
 
-namespace O8
+namespace Math
 {
-	namespace Math
+	//Creation
+	namespace Float4
 	{
-		//Creation
-		namespace Float4
-		{
-			static const float4 one = {{1.0f, 1.0f, 1.0f, 1.0f}};
+		static const float4 one = {{1.0f, 1.0f, 1.0f, 1.0f}};
 
-			inline float4 Zero()
-			{
-				float4 res;
-
-				res.m128 = _mm_setzero_ps();
-
-				return res;
-			}
-
-			inline float4 One()
-			{
-				return one;
-			}
-
-			inline float4 Set(float val)
-			{
-				float4 res;
-
-				res.m128 = _mm_set1_ps(val);
-
-				return res;
-			}
-
-			inline float4 Set(float x, float y, float z, float w)
-			{
-				float4 res;
-
-				res.m128 = _mm_set_ps(w, z, y, x);
-
-				return res;
-			}
-		}
-		
-		inline float4 operator + (const float4 & a, const float4 & b)
+		inline float4 Zero()
 		{
 			float4 res;
 
-			res.m128 = _mm_add_ps(a.m128, b.m128);
+			res.m128 = _mm_setzero_ps();
 
 			return res;
 		}
-		
-		inline float4 operator - (const float4 & a, const float4 & b)
+
+		inline float4 One()
+		{
+			return one;
+		}
+
+		inline float4 Set(float val)
 		{
 			float4 res;
 
-			res.m128 = _mm_sub_ps(a.m128, b.m128);
+			res.m128 = _mm_set1_ps(val);
 
 			return res;
 		}
-		
-		inline float4 operator * (const float4 & a, const float4 & b)
+
+		inline float4 Set(float x, float y, float z, float w)
 		{
 			float4 res;
 
-			res.m128 = _mm_mul_ps(a.m128, b.m128);
-
-			return res;
-		}
-		
-		inline float4 operator * (const float4 & a, const float b)
-		{
-			float4 res, scale;
-
-			scale.m128 = _mm_set1_ps(b);
-			res.m128 = _mm_mul_ps(a.m128, scale.m128);
-
-			return res;
-		}
-		
-		inline float4 operator / (const float4 & a, const float4 & b)
-		{
-			float4 res;
-
-			res.m128 = _mm_div_ps(a.m128, b.m128);
-
-			return res;
-		}
-		
-		inline float4 operator / (const float4 & a, const float b)
-		{
-			float4 res, scale;
-
-			scale.m128 = _mm_set1_ps(b);
-			scale.m128 = _mm_rcp_ps(scale.m128);
-			res.m128 = _mm_mul_ps(a.m128, scale.m128);
-
-			return res;
-		}
-
-		inline float Sum(const float4 & a)
-		{
-			float4 temp1, temp2;
-			
-			temp1.m128 = _mm_shuffle_ps(a.m128, a.m128, _MM_SHUFFLE(3, 3, 1, 1));
-			temp1.m128 = _mm_add_ps(a.m128, temp1.m128);
-
-			temp2.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(3, 3, 3, 2));
-			temp1.m128 = _mm_add_ps(temp2.m128, temp1.m128);
-
-			return temp1.x;
-		}
-
-		inline float SquareLength(const float4 & a)
-		{
-			float4 temp = a * a;
-
-			return Sum(temp);
-		}
-
-		inline float4 Normalise(const float4 & a)
-		{
-			float4 res, temp;
-
-			res = a * a;
-			
-			temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(3, 3, 1, 1));
-			res.m128 = _mm_add_ps(res.m128, temp.m128);
-
-			temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(3, 3, 3, 2));
-			res.m128 = _mm_add_ps(res.m128, temp.m128);
-
-			temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(0, 0, 0, 0));
-			temp.m128 = _mm_rsqrt_ps(temp.m128);
-			res.m128 = _mm_mul_ps(a.m128, temp.m128);
-
-			return res;
-		}
-
-		inline float4 Lerp(const float4 & a, const float4 & b, const float4 & percent)
-		{
-			float4 res;
-
-			res = a + ((b - a) * percent);
+			res.m128 = _mm_set_ps(w, z, y, x);
 
 			return res;
 		}
 	}
+		
+	inline float4 operator + (const float4 & a, const float4 & b)
+	{
+		float4 res;
+
+		res.m128 = _mm_add_ps(a.m128, b.m128);
+
+		return res;
+	}
+		
+	inline float4 operator - (const float4 & a, const float4 & b)
+	{
+		float4 res;
+
+		res.m128 = _mm_sub_ps(a.m128, b.m128);
+
+		return res;
+	}
+		
+	inline float4 operator * (const float4 & a, const float4 & b)
+	{
+		float4 res;
+
+		res.m128 = _mm_mul_ps(a.m128, b.m128);
+
+		return res;
+	}
+		
+	inline float4 operator * (const float4 & a, const float b)
+	{
+		float4 res, scale;
+
+		scale.m128 = _mm_set1_ps(b);
+		res.m128 = _mm_mul_ps(a.m128, scale.m128);
+
+		return res;
+	}
+		
+	inline float4 operator / (const float4 & a, const float4 & b)
+	{
+		float4 res;
+
+		res.m128 = _mm_div_ps(a.m128, b.m128);
+
+		return res;
+	}
+		
+	inline float4 operator / (const float4 & a, const float b)
+	{
+		float4 res, scale;
+
+		scale.m128 = _mm_set1_ps(b);
+		scale.m128 = _mm_rcp_ps(scale.m128);
+		res.m128 = _mm_mul_ps(a.m128, scale.m128);
+
+		return res;
+	}
+
+	inline float Sum(const float4 & a)
+	{
+		float4 temp1, temp2;
+			
+		temp1.m128 = _mm_shuffle_ps(a.m128, a.m128, _MM_SHUFFLE(3, 3, 1, 1));
+		temp1.m128 = _mm_add_ps(a.m128, temp1.m128);
+
+		temp2.m128 = _mm_shuffle_ps(temp1.m128, temp1.m128, _MM_SHUFFLE(3, 3, 3, 2));
+		temp1.m128 = _mm_add_ps(temp2.m128, temp1.m128);
+
+		return temp1.x;
+	}
+
+	inline float SquareLength(const float4 & a)
+	{
+		float4 temp = a * a;
+
+		return Sum(temp);
+	}
+
+	inline float4 Normalise(const float4 & a)
+	{
+		float4 res, temp;
+
+		res = a * a;
+			
+		temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(3, 3, 1, 1));
+		res.m128 = _mm_add_ps(res.m128, temp.m128);
+
+		temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(3, 3, 3, 2));
+		res.m128 = _mm_add_ps(res.m128, temp.m128);
+
+		temp.m128 = _mm_shuffle_ps(res.m128, res.m128, _MM_SHUFFLE(0, 0, 0, 0));
+		temp.m128 = _mm_rsqrt_ps(temp.m128);
+		res.m128 = _mm_mul_ps(a.m128, temp.m128);
+
+		return res;
+	}
+
+	inline float4 Lerp(const float4 & a, const float4 & b, const float4 & percent)
+	{
+		float4 res;
+
+		res = a + ((b - a) * percent);
+
+		return res;
+	}
 }
 
-#endif /* O8_MATH_FLOAT4_HPP */
+#endif /* UTILITIES_MATH_FLOAT4_HPP */
