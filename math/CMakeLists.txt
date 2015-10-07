@@ -1,7 +1,6 @@
 PROJECT ( Math )
 
 ADD_LIBRARY (Math STATIC
-			 Build_test.cpp
 			 Float4.hpp
 			 Float12.hpp
 			 Float16.hpp

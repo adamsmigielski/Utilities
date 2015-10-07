@@ -1,6 +1,6 @@
-PROJECT(Utility)
+PROJECT(memory)
 
-ADD_LIBRARY(Utility STATIC
+ADD_LIBRARY(memory STATIC
 			Binary_data.cpp
 			Binary_data.hpp
 			MemoryAccess.hpp
