@@ -29,35 +29,32 @@
 * @file IsMethod.hpp
 **/
 
-#ifndef O8_TEMPLATES_ISMETHOD_HPP
-#define O8_TEMPLATES_ISMETHOD_HPP
+#ifndef UTILITIES_TASK_ISMETHOD_HPP
+#define UTILITIES_TASK_ISMETHOD_HPP
 
-namespace O8
+namespace Task
 {
-	namespace Templates
+	template<typename O, typename F, typename ...TT>
+	class IsMethod
 	{
-		template<typename O, typename F, typename ...TT>
-		class IsMethod
+	private:
+		typedef char positive_type;
+		typedef long negative_type;
+
+		template<typename C, typename M, typename ...Args>
+		static positive_type f(void (C::*method)(Args...));
+
+		template<typename R, typename S, typename ...Args>
+		static negative_type f(...);
+
+	public:
+		enum
 		{
-		private:
-			typedef char positive_type;
-			typedef long negative_type;
-
-			template<typename C, typename M, typename ...Args>
-			static positive_type f(void (C::*method)(Args...));
-
-			template<typename R, typename S, typename ...Args>
-			static negative_type f(...);
-
-		public:
-			enum
-			{
-				result = (
-				    sizeof(f<O, F, TT...>((F) 0)) == sizeof(positive_type) ? 1 :
-				                                                             0)
-			};
+			result = (
+				sizeof(f<O, F, TT...>((F) 0)) == sizeof(positive_type) ? 1 :
+				                                                            0)
 		};
-	}
+	};
 }
 
-#endif /* O8_TEMPLATES_ISMETHOD_HPP */
+#endif /* UTILITIES_TASK_ISMETHOD_HPP */

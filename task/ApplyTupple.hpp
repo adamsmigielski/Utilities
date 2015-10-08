@@ -29,74 +29,71 @@
 * @file ApplyTupple.hpp
 **/
 
-#ifndef O8_TEMPLATES_APPLYTUPPLE_HPP
-#define O8_TEMPLATES_APPLYTUPPLE_HPP
+#ifndef UTILITIES_TASK_APPLYTUPPLE_HPP
+#define UTILITIES_TASK_APPLYTUPPLE_HPP
 
 #include <tuple>
 
-namespace O8
+namespace Task
 {
-	namespace Templates
+	template<size_t N>
+	class ApplyTupleToFunction
 	{
-		template<size_t N>
-		class ApplyTupleToFunction
+	public:
+		template<typename ...ArgF, typename ...ArgT, typename ...Args>
+		static void Call(void (*f)(ArgF...),
+			std::tuple<ArgT...> & tuple,
+			Args ... args)
 		{
-		public:
-			template<typename ...ArgF, typename ...ArgT, typename ...Args>
-			static void Call(void (*f)(ArgF...),
-			    std::tuple<ArgT...> & tuple,
-			    Args ... args)
-			{
-				ApplyTupleToFunction<N - 1>::Call(f, tuple,
-				    std::get < N - 1 > (tuple), args...);
-			}
-		};
+			ApplyTupleToFunction<N - 1>::Call(f, tuple,
+				std::get < N - 1 > (tuple), args...);
+		}
+	};
 
-		template<>
-		class ApplyTupleToFunction<0>
+	template<>
+	class ApplyTupleToFunction<0>
+	{
+	public:
+		template<typename ...ArgF, typename ...ArgT, typename ...Args>
+		static void Call(void (*f)(ArgF...),
+			std::tuple<ArgT...> & tuple,
+			Args ... args)
 		{
-		public:
-			template<typename ...ArgF, typename ...ArgT, typename ...Args>
-			static void Call(void (*f)(ArgF...),
-			    std::tuple<ArgT...> & tuple,
-			    Args ... args)
-			{
-				f(args...);
-			}
-		};
+			f(args...);
+		}
+	};
 
-		template<size_t N>
-		class ApplyTupleToMethod
+	template<size_t N>
+	class ApplyTupleToMethod
+	{
+	public:
+		template<typename Class, typename ...ArgF, typename ...ArgT,
+			typename ...Args>
+		static void Call(Class * object,
+			void (Class::*f)(ArgF...),
+			std::tuple<ArgT...> & tuple,
+			Args ... args)
 		{
-		public:
-			template<typename Class, typename ...ArgF, typename ...ArgT,
-			    typename ...Args>
-			static void Call(Class * object,
-			    void (Class::*f)(ArgF...),
-			    std::tuple<ArgT...> & tuple,
-			    Args ... args)
-			{
-				ApplyTupleToMethod<N - 1>::Call(object, f, tuple,
-				    std::get < N - 1 > (tuple), args...);
-			}
-		};
+			ApplyTupleToMethod<N - 1>::Call(object, f, tuple,
+				std::get < N - 1 > (tuple), args...);
+		}
+	};
 
-		template<>
-		class ApplyTupleToMethod<0>
+	template<>
+	class ApplyTupleToMethod<0>
+	{
+	public:
+		template<typename Class, typename ...ArgF, typename ...ArgT,
+			typename ...Args>
+		static void Call(Class * object,
+			void (Class::*f)(ArgF...),
+			std::tuple<ArgT...> & tuple,
+			Args ... args)
 		{
-		public:
-			template<typename Class, typename ...ArgF, typename ...ArgT,
-			    typename ...Args>
-			static void Call(Class * object,
-			    void (Class::*f)(ArgF...),
-			    std::tuple<ArgT...> & tuple,
-			    Args ... args)
-			{
-				(object->*f)(args...);
-			}
-		};
+			(object->*f)(args...);
+		}
+	};
 
-	}
 }
 
-#endif /* O8_TEMPLATES_APPLYTUPPLE_HPP */
+#endif /* UTILITIES_TASK_APPLYTUPPLE_HPP */

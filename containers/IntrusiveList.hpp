@@ -103,7 +103,7 @@ namespace Containers
             template <typename P>
             void Sort(const P & p);
 
-            uint32 Size() const;
+            Platform::uint32 Size() const;
 
         private:
             T * m_first;
@@ -545,7 +545,7 @@ namespace Containers
         }
 
         template <typename T>
-        uint32 List<T>::Size() const
+        Platform::uint32 List<T>::Size() const
         {
             GLuint size = 0;
 

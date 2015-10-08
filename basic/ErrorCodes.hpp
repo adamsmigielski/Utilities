@@ -29,8 +29,8 @@
 * @file ErrorCodes.hpp
 **/
 
-#ifndef UTILITIES_COMMON_ERROR_CODES_HPP
-#define UTILITIES_COMMON_ERROR_CODES_HPP
+#ifndef UTILITIES_BASIC_ERROR_CODES_HPP
+#define UTILITIES_BASIC_ERROR_CODES_HPP
 
 namespace Utilities
 {
@@ -51,4 +51,4 @@ namespace Utilities
     };
 }
 
-#endif /* UTILITIES_COMMON_ERROR_CODES_HPP */
+#endif /* UTILITIES_BASIC_ERROR_CODES_HPP */

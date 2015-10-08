@@ -29,8 +29,8 @@
 * @file Log.hpp
 **/
 
-#ifndef UTILITIES_COMMON_LOG_HPP
-#define UTILITIES_COMMON_LOG_HPP
+#ifndef UTILITIES_BASIC_LOG_HPP
+#define UTILITIES_BASIC_LOG_HPP
 
 #define LOG(msg) std::clog << "LOG     " << msg << std::endl;
 #define ERRLOG(msg) std::clog << "ERROR   " << __FILE__ << ":" << __LINE__ << "\t" << msg << std::endl;
@@ -43,6 +43,6 @@
 
 #define CONTLOG(msg) std::clog << "\\       " << __FILE__ << ":" << __LINE__ << "\t" << msg << std::endl;
 
-#endif /* UTILITIES_COMMON_LOG_HPP */
+#endif /* UTILITIES_BASIC_LOG_HPP */
 
 

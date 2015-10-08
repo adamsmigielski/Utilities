@@ -26,13 +26,13 @@
 
 /**
 * @author Adam Œmigielski
-* @file PCH.hpp
+* @file CallConvention.hpp
 **/
 
-#include <Utilities\Platform.hpp>
+#ifndef UTILITIES_BASIC_CALLCONVENTION_HPP
+#define UTILITIES_BASIC_CALLCONVENTION_HPP
 
-#include <Utilities\basic\Assert.hpp>
-#include <Utilities\basic\BreakToDebug.hpp>
-#include <Utilities\basic\Common\Log.hpp>
+#define UTILITIES_API_DECORATION extern "C"
+#define UTILITIES_API __cdecl
 
-#include <iostream>
+#endif /* UTILITIES_BASIC_CALLCONVENTION_HPP */

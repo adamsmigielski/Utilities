@@ -29,8 +29,8 @@
 * @file Platform.hpp
 **/
 
-#ifndef O8_WIN_32_PLATFORM_HPP
-#define O8_WIN_32_PLATFORM_HPP
+#ifndef UTILITIES_PLATFORMS_WIN_32_64_PLATFORM_HPP
+#define UTILITIES_PLATFORMS_WIN_32_64_PLATFORM_HPP
 
 #include <stdint.h>
 
@@ -50,7 +50,7 @@
 #endif /* O8_IS_MINGW */
 
 /* Typedefs */
-namespace Utilities
+namespace Platform
 {
     typedef int8_t       int8;
     typedef uint8_t      uint8;
@@ -63,4 +63,4 @@ namespace Utilities
     typedef uint64_t     uint64;
 }
 
-#endif /* O8_WIN_32_PLATFORM_HPP */
+#endif /* UTILITIES_PLATFORMS_WIN_32_64_PLATFORM_HPP */

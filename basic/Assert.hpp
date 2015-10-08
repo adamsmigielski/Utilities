@@ -29,8 +29,8 @@
 * @file Assert.hpp
 **/
 
-#ifndef UTILITIES_COMMON_ASSERT_HPP
-#define UTILITIES_COMMON_ASSERT_HPP
+#ifndef UTILITIES_BASIC_ASSERT_HPP
+#define UTILITIES_BASIC_ASSERT_HPP
 
 #ifdef NDEBUG
 	# define ASSERT(expr) ((void)0)
@@ -38,4 +38,4 @@
 	# define ASSERT(expr) if (false == (expr)) BREAK_TO_DEBUG
 #endif
 
-#endif /* UTILITIES_COMMON_ASSERT_HPP */
+#endif /* UTILITIES_BASIC_ASSERT_HPP */

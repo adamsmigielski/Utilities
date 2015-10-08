@@ -61,7 +61,7 @@ namespace Memory
 
                 memcpy(buffer, ptr, size);
 
-                return Success;
+                return Utilities::Success;
             }
 
             int32 Write(
@@ -79,7 +79,7 @@ namespace Memory
 
                 memcpy(ptr, buffer, size);
 
-                return Success;
+                return Utilities::Success;
             }
 
         private:
@@ -117,7 +117,7 @@ namespace Memory
 
                 memcpy(buffer, ptr, size);
 
-                return Success;
+                return Utilities::Success;
             }
 
             int32 Write(
@@ -141,7 +141,7 @@ namespace Memory
 
                 memcpy(ptr, buffer, size);
 
-                return Success;
+                return Utilities::Success;
             }
 
         private:
@@ -173,7 +173,7 @@ namespace Memory
                     return Failure;
                 }
 
-                return Success;
+                return Utilities::Success;
             }
 
             int32 Write(
@@ -191,7 +191,7 @@ namespace Memory
                     return Failure;
                 }
 
-                return Success;
+                return Utilities::Success;
             }
 
         private:
@@ -255,7 +255,7 @@ namespace Memory
                 b,
                 offset,
                 out_t);
-            if (Success != ret)
+            if (Utilities::Success != ret)
             {
                 return ret;
             }
@@ -265,7 +265,7 @@ namespace Memory
                 Swap_endianess(out_t);
             }
 
-            return Success;
+            return Utilities::Success;
         }
 
         template <typename B, typename T>
@@ -293,7 +293,7 @@ namespace Memory
             Wrapper<B> w(b);
             uint32 length;
 
-            if (Success != w.Read(
+            if (Utilities::Success != w.Read(
                 offset,
                 &length,
                 sizeof(uint32)))
@@ -314,7 +314,7 @@ namespace Memory
                 return Failure;
             }
 
-            if (Success != w.Read(
+            if (Utilities::Success != w.Read(
                 offset + sizeof(length),
                 &out_string.front(),
                 length))
@@ -323,7 +323,7 @@ namespace Memory
                 return Failure;
             }
 
-            return Success;
+            return Utilities::Success;
         }
 
         template <typename B, typename T>
@@ -345,7 +345,7 @@ namespace Memory
             Wrapper<B> w(b);
             const uint32 length = (uint32)string.length();
 
-            if (Success != w.Write(offset, &length, sizeof(uint32)))
+            if (Utilities::Success != w.Write(offset, &length, sizeof(uint32)))
             {
                 ASSERT(0);
                 return Failure;
