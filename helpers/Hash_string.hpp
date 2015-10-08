@@ -29,8 +29,8 @@
 * @file Hash_string.hpp
 **/
 
-#ifndef UTILITIES_UTILITY_HASH_STRING_HPP
-#define UTILITIES_UTILITY_HASH_STRING_HPP
+#ifndef UTILITIES_HELPERS_HASH_STRING_HPP
+#define UTILITIES_HELPERS_HASH_STRING_HPP
 
 namespace Helpers
 {
@@ -38,4 +38,4 @@ namespace Helpers
     size_t Hash_string(const char * string);
 }
 
-#endif /* UTILITIES_UTILITY_HASH_STRING_HPP */
+#endif /* UTILITIES_HELPERS_HASH_STRING_HPP */

@@ -69,7 +69,7 @@ namespace Containers
 			void decrease_reference_count();
 
 			Event_handler * m_event_handler;
-			uint32 m_reference_counter;
+			Platform::uint32 m_reference_counter;
 		};
 
 		template <typename T>

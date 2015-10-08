@@ -34,48 +34,45 @@
 #include "Name.hpp"
 #include "Hash_string.hpp"
 
-namespace O8
+namespace Helpers
 {
-    namespace Utility
+    Name::Name()
+        : m_hash(0)
     {
-        Name::Name()
-            : m_hash(0)
-        {
-            /* Nothing to be done here */
-        }
+        /* Nothing to be done here */
+    }
 
-        Name::~Name()
-        {
-            m_hash = 0;
-        }
+    Name::~Name()
+    {
+        m_hash = 0;
+    }
 
-        void Name::Clear()
-        {
-            m_name.clear();
-            m_hash = 0;
-        }
+    void Name::Clear()
+    {
+        m_name.clear();
+        m_hash = 0;
+    }
 
-        void Name::operator()(const std::string & name)
+    void Name::operator()(const std::string & name)
+    {
+        if (true == name.empty())
         {
-            if (true == name.empty())
-            {
-                Clear();
-            }
-            else
-            {
-                m_name = name;
-                m_hash = Hash_string(m_name);
-            }
+            Clear();
         }
+        else
+        {
+            m_name = name;
+            m_hash = Hash_string(m_name);
+        }
+    }
 
-        const std::string & Name::operator()(void) const
-        {
-            return m_name;
-        }
+    const std::string & Name::operator()(void) const
+    {
+        return m_name;
+    }
 
-        size_t Name::Hash() const
-        {
-            return m_hash;
-        }
+    size_t Name::Hash() const
+    {
+        return m_hash;
     }
 }

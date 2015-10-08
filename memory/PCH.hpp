@@ -34,9 +34,9 @@
 
 #include <Platform\Platform.hpp>
 
-#include <Utilities\common\Assert.hpp>
-#include <Utilities\common\BreakToDebug.hpp>
-#include <Utilities\common\Log.hpp>
+#include <Utilities\basic\Assert.hpp>
+#include <Utilities\basic\BreakToDebug.hpp>
+#include <Utilities\basic\Log.hpp>
 
 #include <iostream>
 

@@ -29,65 +29,62 @@
 * @file Name.hpp
 **/
 
-#ifndef UTILITIES_UTILITY_NAME_HPP
-#define UTILITIES_UTILITY_NAME_HPP
+#ifndef UTILITIES_HELPERS_NAME_HPP
+#define UTILITIES_HELPERS_NAME_HPP
 
-namespace O8
+namespace Helpers
 {
-    namespace Utility
+    class Name
     {
-        class Name
+    public:
+        Name();
+        ~Name();
+
+        void Clear();
+
+        void operator()(const std::string & name);
+        const std::string & operator() (void) const;
+        size_t Hash() const;
+
+    private:
+        std::string m_name;
+        size_t m_hash;
+    };
+
+    template <typename T>
+    class Name_predicate
+    {
+    public:
+        Name_predicate(const std::string & name)
+            : m_hash(Hash_string(name))
         {
-        public:
-            Name();
-            ~Name();
+            /* Nothing to be done here */
+        }
 
-            void Clear();
-
-            void operator()(const std::string & name);
-            const std::string & operator() (void) const;
-            size_t Hash() const;
-
-        private:
-            std::string m_name;
-            size_t m_hash;
-        };
-
-        template <typename T>
-        class Name_predicate
+        Name_predicate(size_t hash)
+            : m_hash(hash)
         {
-        public:
-            Name_predicate(const std::string & name)
-                : m_hash(Hash_string(name))
-            {
-                /* Nothing to be done here */
-            }
+            /* Nothing to be done here */
+        }
 
-            Name_predicate(size_t hash)
-                : m_hash(hash)
-            {
-                /* Nothing to be done here */
-            }
-
-            bool operator()(const T& t) const
-            {
-                return (t.m_Name.Hash() == m_hash);
-            }
-
-        private:
-            size_t m_hash;
-        };
-
-        template <typename T>
-        class Name_ascend_predicate
+        bool operator()(const T& t) const
         {
-        public:
-            int operator()(const T& left, const T& right) const
-            {
-                return left.m_Name().compare(right.m_Name());
-            }
-        };
-    }
+            return (t.m_Name.Hash() == m_hash);
+        }
+
+    private:
+        size_t m_hash;
+    };
+
+    template <typename T>
+    class Name_ascend_predicate
+    {
+    public:
+        int operator()(const T& left, const T& right) const
+        {
+            return left.m_Name().compare(right.m_Name());
+        }
+    };
 }
 
-#endif UTILITIES_UTILITY_NAME_HPP
+#endif UTILITIES_HELPERS_NAME_HPP

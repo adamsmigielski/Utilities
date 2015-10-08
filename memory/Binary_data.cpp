@@ -41,7 +41,7 @@ namespace Memory
         /* Nothing to be done here */
     }
 
-    Binary_data::Binary_data(uint8 * data, size_t size)
+    Binary_data::Binary_data(Platform::uint8 * data, size_t size)
         : m_data(data)
         , m_size(size)
     {
@@ -82,7 +82,7 @@ namespace Memory
         Release();
     }
 
-    uint8 * Binary_data::Data() const
+    Platform::uint8 * Binary_data::Data() const
     {
         return m_data;
     }
@@ -92,7 +92,7 @@ namespace Memory
         return m_size;
     }
 
-    uint8 & Binary_data::operator [] (size_t offset) const
+    Platform::uint8 & Binary_data::operator [] (size_t offset) const
     {
         return *(m_data + offset);
     }
@@ -108,7 +108,7 @@ namespace Memory
         m_size = 0;
     }
 
-    void Binary_data::Reset(uint8 * data, size_t size)
+    void Binary_data::Reset(Platform::uint8 * data, size_t size)
     {
         Release();
 
@@ -121,9 +121,9 @@ namespace Memory
         return (nullptr == m_data);
     }
 
-    void Binary_data::copy(uint8 * data, size_t size)
+    void Binary_data::copy(Platform::uint8 * data, size_t size)
     {
-        auto ptr = new uint8[size];
+        auto ptr = new Platform::uint8[size];
 
         if (nullptr == ptr)
         {
@@ -137,7 +137,7 @@ namespace Memory
         set(ptr, size);
     }
 
-    void Binary_data::set(uint8 * data, size_t size)
+    void Binary_data::set(Platform::uint8 * data, size_t size)
     {
         m_data = data;
         m_size = size;

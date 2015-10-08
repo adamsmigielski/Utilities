@@ -5,4 +5,6 @@ ADD_LIBRARY (helpers STATIC
 			 Hash_string.hpp
 			 Name.cpp
 			 Name.hpp
+			 PCH.cpp
+			 PCH.hpp
 			 Type.hpp)

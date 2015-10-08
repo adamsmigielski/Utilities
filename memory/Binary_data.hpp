@@ -38,7 +38,7 @@ namespace Memory
     {
     public:
         Binary_data();
-        Binary_data(uint8 * data, size_t size);
+        Binary_data(Platform::uint8 * data, size_t size);
         Binary_data(const Binary_data & data);
         Binary_data(Binary_data && data);
         Binary_data & operator = (const Binary_data & data);
@@ -46,24 +46,24 @@ namespace Memory
         ~Binary_data();
 
 
-        uint8 * Data() const;
+        Platform::uint8 * Data() const;
         size_t Size() const;
-        uint8 & operator [] (size_t offset) const;
+        Platform::uint8 & operator [] (size_t offset) const;
 
-        int32 Copy_range(
+        Platform::int32 Copy_range(
             const Binary_data & data,
             size_t offset,
             size_t size);
         void Release();
-        void Reset(uint8 * data, size_t size);
+        void Reset(Platform::uint8 * data, size_t size);
 
         bool Is_null() const;
 
     private:
-        void copy(uint8 * data, size_t size);
-        void set(uint8 * data, size_t size);
+        void copy(Platform::uint8 * data, size_t size);
+        void set(Platform::uint8 * data, size_t size);
 
-        uint8 * m_data;
+        Platform::uint8 * m_data;
         size_t m_size;
     };
 
