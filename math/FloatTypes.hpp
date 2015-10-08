@@ -32,7 +32,7 @@
 #ifndef UTILITIES_MATH_FLOATTYPES_HPP
 #define UTILITIES_MATH_FLOATTYPES_HPP
 
-#include <Utilities\common\Align.hpp>
+#include <Utilities\basic\Align.hpp>
 #include <xmmintrin.h>
 
 namespace Math
