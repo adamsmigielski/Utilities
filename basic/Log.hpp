@@ -43,6 +43,11 @@
 
 #define CONTLOG(msg) std::clog << "\\       " << __FILE__ << ":" << __LINE__ << "\t" << msg << std::endl;
 
+namespace Utilities
+{
+	
+}
+
 #endif /* UTILITIES_BASIC_LOG_HPP */
 
 

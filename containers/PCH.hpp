@@ -29,7 +29,7 @@
 * @file PCH.hpp
 **/
 
-#include <Utilities\Platform.hpp>
+#include <Platform\Platform.hpp>
 
 #include <Utilities\basic\Assert.hpp>
 #include <Utilities\basic\BreakToDebug.hpp>

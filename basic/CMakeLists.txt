@@ -6,6 +6,7 @@ ADD_LIBRARY (basic STATIC
              BreakToDebug.hpp
 			 CallConvention.hpp
 			 ErrorCodes.hpp
+			 Log.cpp
              Log.hpp
              PCH.cpp
              PCH.hpp

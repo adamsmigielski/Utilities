@@ -32,7 +32,7 @@
 #ifndef UTILITIES_MEMORY_PCH_HPP
 #define UTILITIES_MEMORY_PCH_HPP
 
-#include <Utilities\Platform.hpp>
+#include <Platform\Platform.hpp>
 
 #include <Utilities\common\Assert.hpp>
 #include <Utilities\common\BreakToDebug.hpp>

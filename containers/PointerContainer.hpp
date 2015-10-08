@@ -57,7 +57,7 @@ namespace Containers
 
 
         template <class T>
-        void Operations<T>::Delete_entry(typename Operations<T>::pointer_reference entry)
+        void Operations<T>::Delete_entry(typename Operations<T>::type::pointer_reference entry)
         {
             pointer ptr = entry;
 
