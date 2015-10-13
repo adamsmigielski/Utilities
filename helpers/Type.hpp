@@ -34,11 +34,47 @@
 
 namespace Helpers
 {
+    template <typename T>
+    class Difference_type
+    {
+    public:
+        typedef T difference_type;
+    };
+
+    template <>
+    class Difference_type < Platform::uint8 >
+    {
+    public:
+        typedef Platform::int16 difference_type;
+    };
+
+    template <>
+    class Difference_type < Platform::uint16 >
+    {
+    public:
+        typedef Platform::int32 difference_type;
+    };
+
+    template <>
+    class Difference_type < Platform::uint32 >
+    {
+    public:
+        typedef Platform::int64 difference_type;
+    };
+
+    template <>
+    class Difference_type < Platform::uint64 >
+    {
+    public:
+        typedef Platform::int64 difference_type;
+    };
+
     template <class T>
     class Type
     {
     public:
         typedef T value_type;
+        typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
         typedef const pointer const_pointer;
@@ -52,6 +88,7 @@ namespace Helpers
     {
     public:
         typedef T value_type;
+        typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
         typedef const pointer const_pointer;
@@ -65,6 +102,7 @@ namespace Helpers
     {
     public:
         typedef T value_type;
+        typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
         typedef const pointer const_pointer;

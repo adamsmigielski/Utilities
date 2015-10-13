@@ -42,7 +42,11 @@ namespace Containers
         template <typename T>
         class Node
         {
-            friend class List < T > ;
+        public:
+            typedef Containers::IntrusiveList::List< T > List;
+
+            friend class List;
+
         public:
             Node();
             virtual ~Node();
@@ -55,14 +59,14 @@ namespace Containers
             T * Previous();
             const T * Previous() const;
 
-            List<T> * Parent();
-            const List<T> * Parent() const;
+            List * Parent();
+            const List * Parent() const;
 
         private:
             T * m_next;
             T * m_prev;
 
-            List<T> * m_parent;
+            List * m_parent;
         };
 
         template <typename T>

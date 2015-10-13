@@ -32,4 +32,6 @@
 #ifndef UTILITIES_MATH_PCH
 #define UTILITIES_MATH_PCH
 
+#include <Platform\Platform.hpp>
+
 #endif /* UTILITIES_MATH_PCH */
