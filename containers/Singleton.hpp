@@ -41,10 +41,13 @@ namespace Containers
         typedef T value_type;
         typedef T * pointer;
 
-        Singleton();
         virtual ~Singleton();
 
         static typename pointer Get_singleton();
+        static void Release();
+
+    protected:
+        Singleton();
 
     private:
         static typename pointer s_singleton;
@@ -71,6 +74,16 @@ namespace Containers
         }
 
         return s_singleton;
+    }
+
+    template <typename T>
+    void Singleton<T>::Release()
+    {
+        if (nullptr != s_singleton)
+        {
+            auto singleton = s_singleton;
+            delete singleton;
+        }
     }
 
     template <class T>

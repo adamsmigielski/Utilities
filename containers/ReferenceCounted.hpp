@@ -36,8 +36,9 @@ namespace Containers
 {
 	namespace ReferenceCounted
 	{
-		class Resource;
+		class Base_resource;
 
+        template <typename T>
 		class Event_handler
 		{
 		public:
@@ -45,32 +46,39 @@ namespace Containers
 			{
 			}
 
-			virtual void On_resource_destruction(Resource * resource);
+			virtual void On_resource_destruction(T * resource);
 			virtual void On_last_reference_gone(
-				Resource * resource,
+				T * resource,
 				bool & should_resource_be_destoyed);
 		};
 
-		class Resource
-		{
-			template <typename T>
-			friend class Reference;
+        template <typename T>
+        class Resource
+        {
+            template <typename T>
+            friend class Reference;
 
-		public:
-			virtual ~Resource();
+        public:
+            using Event_handler = Event_handler < T >;
+            using Reference = Reference < T >;
+            using ref_count_t = Platform::uint32;
 
-			void Set_event_handler(Event_handler * handler);
+            Event_handler * Get_event_handler() const;
+            void Set_event_handler(Event_handler * handler);
 
-		protected:
-			Resource();
+            ref_count_t Get_references_number() const;
 
-		private:
+        protected:
+            Resource();
+            virtual ~Resource();
+
+        private:
 			void increase_reference_count();
 			void decrease_reference_count();
 
-			Event_handler * m_event_handler;
-			Platform::uint32 m_reference_counter;
-		};
+            Event_handler * m_event_handler = nullptr;
+            ref_count_t m_reference_counter = ref_count_t(0);
+        };
 
 		template <typename T>
 		class Reference
@@ -87,8 +95,8 @@ namespace Containers
 			void Reset(T * resource);
 			void Release();
 
-			T * operator * ();
-			const T * operator * () const;
+			T & operator * ();
+			const T & operator * () const;
 
 			T * operator -> ();
 			const T * operator -> () const;
@@ -102,8 +110,101 @@ namespace Containers
 			T * m_resource;
 		};
 
+        /* *** Even_handler *** */
+        template <typename T>
+        void Event_handler<T>::On_resource_destruction(T * resource)
+        {
+            /* Nothing to be done here */
+        }
+
+        template <typename T>
+        void Event_handler<T>::On_last_reference_gone(
+            T * resource,
+            bool & should_resource_be_destoyed)
+        {
+            should_resource_be_destoyed = true;
+        }
+
+        /* *** Resource *** */
 
 
+        template <typename T>
+        Resource<T>::Resource()
+        {
+            /* Nothing to be done here */
+        }
+
+        template <typename T>
+        Resource<T>::~Resource()
+        {
+            if (nullptr != m_event_handler)
+            {
+                m_event_handler->On_resource_destruction((T *) this);
+                m_event_handler = nullptr;
+            }
+        }
+
+        template <typename T>
+        auto Resource<T>::Get_event_handler() const -> Event_handler *
+        {
+            return m_event_handler;
+        }
+
+        template <typename T>
+        void Resource<T>::Set_event_handler(Event_handler * handler)
+        {
+            m_event_handler = handler;
+        }
+
+        template <typename T>
+        auto Resource<T>::Get_references_number() const -> ref_count_t
+        {
+            return m_reference_counter;
+        }
+
+        template <typename T>
+        void Resource<T>::increase_reference_count()
+        {
+            m_reference_counter += ref_count_t(1);
+        }
+
+        template <typename T>
+        void Resource<T>::decrease_reference_count()
+        {
+            if (1 == m_reference_counter)
+            {
+                m_reference_counter = ref_count_t(0);
+
+                if (nullptr == m_event_handler)
+                {
+                    delete this;
+                }
+                else
+                {
+                    bool should_resource_be_destroyed = true;
+
+                    m_event_handler->On_last_reference_gone(
+                        (T *) this,
+                        should_resource_be_destroyed);
+
+                    if (true == should_resource_be_destroyed)
+                    {
+                        delete this;
+                    }
+                }
+            }
+            else if (0 == m_reference_counter)
+            {
+                DEBUGLOG("Something is seriously wrong with reference counted resources");
+                ASSERT(0);
+            }
+            else
+            {
+                m_reference_counter -= ref_count_t(1);
+            }
+        }
+
+        /* *** Reference *** */
 		template <typename T>
 		Reference<T>::Reference()
 			: m_resource(nullptr)
@@ -120,31 +221,22 @@ namespace Containers
 
 		template <typename T>
 		Reference<T>::Reference(const Reference & reference)
-			: m_resource(reference.m_resource)
+            : Reference(reference.m_resource)
 		{
-			if (nullptr != m_resource)
-			{
-				m_resource->increase_reference_count();
-			}
-		}
+            /* Nothing to be done here */
+        }
 
 		template <typename T>
 		Reference<T>::Reference(Reference && reference)
-			: m_resource(std::move(reference.m_resource))
+            : Reference(reference.m_resource)
 		{
+            reference.Release();
 		}
 
 		template <typename T>
 		Reference<T> & Reference<T>::operator = (const Reference & reference)
 		{
-			Release();
-
-			m_resource = reference.m_resource;
-
-			if (nullptr != m_resource)
-			{
-				m_resource->increase_reference_count();
-			}
+            Reset(reference.m_resource);
 
 			return *this;
 		}
@@ -152,9 +244,10 @@ namespace Containers
 		template <typename T>
 		Reference<T> & Reference<T>::operator = (Reference && reference)
 		{
-			Release();
+            Reset(reference.m_resource);
+            reference.Release();
 
-			m_resource = std::move(reference.m_resource);
+            return *this;
 		}
 
 		template <typename T>
@@ -189,12 +282,12 @@ namespace Containers
 				return;
 			}
 
-			m_resource->increase_reference_count();
-			m_resource = resource;
+            m_resource = resource;
+            m_resource->increase_reference_count();
 		}
 
 		template <typename T>
-		T * Reference<T>::operator * ()
+		T & Reference<T>::operator * ()
 		{
 			ASSERT(nullptr != m_resource);
 
@@ -202,7 +295,7 @@ namespace Containers
 		}
 
 		template <typename T>
-		const T * Reference<T>::operator * () const
+		const T & Reference<T>::operator * () const
 		{
 			ASSERT(nullptr != m_resource);
 
@@ -228,16 +321,12 @@ namespace Containers
 		template <typename T>
 		T * Reference<T>::Get()
 		{
-			ASSERT(nullptr != m_resource);
-
 			return m_resource;
 		}
 
 		template <typename T>
 		const T * Reference<T>::Get() const
 		{
-			ASSERT(nullptr != m_resource);
-
 			return m_resource;
 		}
 	}

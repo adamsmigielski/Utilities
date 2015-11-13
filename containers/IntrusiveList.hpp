@@ -43,7 +43,7 @@ namespace Containers
         class Node
         {
         public:
-            typedef Containers::IntrusiveList::List< T > List;
+            using List = Containers::IntrusiveList::List< T >;
 
             friend class List;
 
@@ -209,6 +209,12 @@ namespace Containers
             {
                 ASSERT(0);
                 return;
+            }
+
+            /* Detach from previous list */
+            if (nullptr != node->m_parent)
+            {
+                node->m_parent->Detach(node);
             }
 
             if (nullptr == m_last) /* List is empty */
@@ -520,12 +526,13 @@ namespace Containers
         template <typename P>
         void List<T>::Sort(const P & p)
         {
-            for (T * last = Last();
-                nullptr != last;
-                last = last->Previous())
+            T * last = Last();
+
+            while (nullptr != last)
             {
-                for (T * it = First();
-                    last != it;)
+                T * it = First();
+                
+                while (last != it)
                 {
                     T * left = it;
                     T * right = it->Next();
@@ -545,6 +552,8 @@ namespace Containers
                         it = it->Next();
                     }
                 }
+
+                last = it->Previous();
             }
         }
 
