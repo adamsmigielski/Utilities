@@ -77,6 +77,7 @@ namespace Helpers
         typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
+        typedef value_type && rvalue_reference;
         typedef const pointer const_pointer;
 		typedef const reference & const_reference;
 		typedef pointer & pointer_reference;
@@ -91,6 +92,7 @@ namespace Helpers
         typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
+        typedef value_type && rvalue_reference;
         typedef const pointer const_pointer;
 		typedef const reference & const_reference;
 		typedef pointer & pointer_reference;
@@ -105,6 +107,7 @@ namespace Helpers
         typedef typename Difference_type<T>::difference_type difference_type;
         typedef value_type * pointer;
         typedef value_type & reference;
+        typedef value_type && rvalue_reference;
         typedef const pointer const_pointer;
 		typedef const reference & const_reference;
 		typedef pointer & pointer_reference;

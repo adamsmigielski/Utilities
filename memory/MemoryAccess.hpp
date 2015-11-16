@@ -46,7 +46,7 @@ namespace Memory
                 /* Nothing to be done here */
             }
 
-            int32 Read(
+            Platform::int32 Read(
                 size_t offset,
                 void * buffer,
                 size_t size)
@@ -56,7 +56,7 @@ namespace Memory
                 if (nullptr == ptr)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 memcpy(buffer, ptr, size);
@@ -64,7 +64,7 @@ namespace Memory
                 return Utilities::Success;
             }
 
-            int32 Write(
+            Platform::int32 Write(
                 size_t offset,
                 const void * buffer,
                 size_t size)
@@ -74,7 +74,7 @@ namespace Memory
                 if (nullptr == ptr)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 memcpy(ptr, buffer, size);
@@ -87,16 +87,16 @@ namespace Memory
         };
 
         template <>
-        class Wrapper < Utility::Binary_data >
+        class Wrapper < Memory::Binary_data >
         {
         public:
-            Wrapper(Utility::Binary_data & t)
+            Wrapper(Memory::Binary_data & t)
                 : m_t(t)
             {
                 /* Nothing to be done here */
             }
 
-            int32 Read(
+            Platform::int32 Read(
                 size_t offset,
                 void * buffer,
                 size_t size)
@@ -104,15 +104,15 @@ namespace Memory
                 if (m_t.Size() < offset + size)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
-                uint8 * ptr = (uint8 *) m_t.Data() + offset;
+                auto ptr = (Platform::uint8 *)m_t.Data() + offset;
 
                 if (nullptr == ptr)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 memcpy(buffer, ptr, size);
@@ -120,7 +120,7 @@ namespace Memory
                 return Utilities::Success;
             }
 
-            int32 Write(
+            Platform::int32 Write(
                 size_t offset,
                 const void * buffer,
                 size_t size)
@@ -128,15 +128,15 @@ namespace Memory
                 if (m_t.Size() < offset + size)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
-                uint8 * ptr = (uint8 *) m_t.Data() + offset;
+                auto ptr = (Platform::uint8 *) m_t.Data() + offset;
 
                 if (nullptr == ptr)
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 memcpy(ptr, buffer, size);
@@ -145,7 +145,7 @@ namespace Memory
             }
 
         private:
-            Utility::Binary_data & m_t;
+            Memory::Binary_data & m_t;
         };
 
         template <>
@@ -158,7 +158,7 @@ namespace Memory
                 /* Nothing to be done here */
             }
 
-            int32 Read(
+            Platform::int32 Read(
                 size_t offset,
                 void * buffer,
                 size_t size)
@@ -170,13 +170,13 @@ namespace Memory
                 if (false == m_t.good())
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 return Utilities::Success;
             }
 
-            int32 Write(
+            Platform::int32 Write(
                 size_t offset,
                 const void * buffer,
                 size_t size)
@@ -188,7 +188,7 @@ namespace Memory
                 if (false == m_t.good())
                 {
                     ASSERT(0);
-                    return Failure;
+                    return Utilities::Failure;
                 }
 
                 return Utilities::Success;
@@ -201,16 +201,16 @@ namespace Memory
         template <typename T>
         void Swap_endianess(T & t)
         {
-            static const uint size = sizeof(T);
-            static const uint n_iter = size / 2;
-            static const uint last = size - 1;
+            static const Platform::uint size = sizeof(T);
+            static const Platform::uint n_iter = size / 2;
+            static const Platform::uint last = size - 1;
 
             char * ptr = (char *) &t;
 
-            for (uint i = 0; i < n_iter; ++i)
+            for (Platform::uint i = 0; i < n_iter; ++i)
             {
-                const uint beg = i;
-                const uint end = last - i;
+                const Platform::uint beg = i;
+                const Platform::uint end = last - i;
 
                 char temp = ptr[end];
                 ptr[end] = ptr[beg];
@@ -219,19 +219,19 @@ namespace Memory
         }
 
         template <>
-        void Swap_endianess(int8 & c)
+        void Swap_endianess(Platform::int8 & c)
         {
             /* Nothing to be done here */
         }
 
         template <>
-        void Swap_endianess(uint8 & c)
+        void Swap_endianess(Platform::uint8 & c)
         {
             /* Nothing to be done here */
         }
 
         template <typename B, typename T>
-        int32 Read(
+        Platform::int32 Read(
             B & b,
             size_t offset,
             T & out_t)
@@ -245,7 +245,7 @@ namespace Memory
         }
 
         template <typename B, typename T>
-        int32 Read(
+        Platform::int32 Read(
             B & b,
             size_t offset,
             bool swap_endianess,
@@ -269,7 +269,7 @@ namespace Memory
         }
 
         template <typename B, typename T>
-        int32 Read(
+        Platform::int32 Read(
             B & b,
             size_t offset,
             size_t size,
@@ -284,22 +284,22 @@ namespace Memory
         }
 
         template <typename B>
-        int32 Read(
+        Platform::int32 Read(
             B & b,
             size_t offset,
             bool swap_endianess,
             std::string & out_string)
         {
             Wrapper<B> w(b);
-            uint32 length;
+            Platform::uint32 length;
 
             if (Utilities::Success != w.Read(
                 offset,
                 &length,
-                sizeof(uint32)))
+                sizeof(Platform::uint32)))
             {
                 ASSERT(0);
-                return Failure;
+                return Utilities::Failure;
             }
 
             if (true == swap_endianess)
@@ -311,7 +311,7 @@ namespace Memory
             if (length > out_string.length())
             {
                 ASSERT(0);
-                return Failure;
+                return Utilities::Failure;
             }
 
             if (Utilities::Success != w.Read(
@@ -320,14 +320,14 @@ namespace Memory
                 length))
             {
                 ASSERT(0);
-                return Failure;
+                return Utilities::Failure;
             }
 
             return Utilities::Success;
         }
 
         template <typename B, typename T>
-        int32 Write(
+        Platform::int32 Write(
             B & b,
             size_t offset,
             const T & t)
@@ -337,7 +337,7 @@ namespace Memory
         }
 
         template <typename B>
-        int32 Write(
+        Platform::int32 Write(
             Wrapper<B> & w,
             size_t offset,
             const std::string & string)
@@ -348,7 +348,7 @@ namespace Memory
             if (Utilities::Success != w.Write(offset, &length, sizeof(uint32)))
             {
                 ASSERT(0);
-                return Failure;
+                return Utilities::Failure;
             }
 
             return w.Write(
@@ -358,7 +358,7 @@ namespace Memory
         }
 
         template <typename B, typename T>
-        int32 Write(
+        Platform::int32 Write(
             B & b,
             size_t offset,
             const T * t,

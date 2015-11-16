@@ -35,8 +35,7 @@
 namespace Memory
 {
     Binary_data::Binary_data()
-        : m_data(nullptr)
-        , m_size(0)
+        : Binary_data(nullptr, 0)
     {
         /* Nothing to be done here */
     }
@@ -49,21 +48,21 @@ namespace Memory
     }
 
     Binary_data::Binary_data(const Binary_data & data)
-        : m_data(nullptr)
-        , m_size(0)
+        : Binary_data()
     {
         copy(data.m_data, data.m_size);
     }
 
     Binary_data::Binary_data(Binary_data && data)
-        : m_data(std::move(data.m_data))
-        , m_size(std::move(data.m_size))
+        : Binary_data()
     {
-        /* Nothing to be done here */
+        move(data);
     }
 
     Binary_data & Binary_data::operator = (const Binary_data & data)
     {
+        Release();
+
         copy(data.m_data, data.m_size);
 
         return *this;
@@ -71,8 +70,9 @@ namespace Memory
 
     Binary_data & Binary_data::operator = (Binary_data && data)
     {
-        m_data = std::move(data.m_data);
-        m_size = std::move(data.m_size);
+        Release();
+
+        move(data);
 
         return *this;
     }
@@ -135,6 +135,12 @@ namespace Memory
         memcpy(ptr, data, size);
 
         set(ptr, size);
+    }
+
+    void Binary_data::move(Binary_data & data)
+    {
+        set(data.m_data, data.m_size);
+        data.set(nullptr, 0);
     }
 
     void Binary_data::set(Platform::uint8 * data, size_t size)

@@ -61,6 +61,7 @@ namespace Memory
 
     private:
         void copy(Platform::uint8 * data, size_t size);
+        void move(Binary_data & data);
         void set(Platform::uint8 * data, size_t size);
 
         Platform::uint8 * m_data;
