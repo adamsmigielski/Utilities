@@ -60,11 +60,17 @@ namespace Text
             Platform::int32  m_vertical_advance;
         };
 
-        /* Ctr, dtr, operators */
-        Glyph() = default;
-        ~Glyph() = default;
-        Glyph(const Glyph & g) = delete;
-        Glyph & operator = (const Glyph & g) = delete;
+        /* Ctr & dtr */
+        Glyph();
+        ~Glyph();
+
+        /* Copy */
+        Glyph(const Glyph & g) = default;
+        Glyph & operator = (const Glyph & g) = default;
+
+        /* Move */
+        Glyph(Glyph && glyph);
+        Glyph & operator = (Glyph && glyph);
 
         /* Initialization and release */
         Platform::int32 Init(
@@ -79,7 +85,7 @@ namespace Text
     private:
         Memory::Binary_data m_data;
 
-        Descriptor m_descriptor = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        Descriptor m_descriptor;
     };
 }
 

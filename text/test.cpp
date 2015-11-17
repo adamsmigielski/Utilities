@@ -32,212 +32,349 @@
 #include "PCH.hpp"
 
 #include <Unit_Tests\UnitTests.hpp>
+#include <Utilities\memory\Binary_data.hpp>
+#include <Utilities\memory\MemoryAccess.hpp>
 
-#include "Float.hpp"
+#include "Glyph.hpp"
+#include "Font.hpp"
+#include "Layout.hpp"
 
-#include <cstring>
-
-UNIT_TEST(Float16_constants)
+UNIT_TEST(Text_glyph_initial_state)
 {
-    TEST_ASSERT(true, Math::float16::m_Has_sign);
+    Text::Glyph glyph;
 
-    /* Sign */
-    TEST_ASSERT(0x8000, Math::float16::Sign_bit::m_Bit);
-    TEST_ASSERT(0x7fff, Math::float16::Sign_bit::m_Bit_inv);
-    TEST_ASSERT(0x8000, Math::float16::Sign_bit::m_MSE_bits);
-    TEST_ASSERT(0x7fff, Math::float16::Sign_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0xffff, Math::float16::Sign_bit::m_LSE_bits);
-    TEST_ASSERT(0x0000, Math::float16::Sign_bit::m_LSE_inv_bits);
+    auto& data = glyph.Get_data();
+    TEST_ASSERT(true, data.Is_null());
 
-    /* Exponent */
-    TEST_ASSERT(0xffff, Math::float16::Exponent_mask::Masks::m_All);
-    TEST_ASSERT(0x0001, Math::float16::Exponent_mask::Masks::m_One);
-    TEST_ASSERT(0x0000, Math::float16::Exponent_mask::Masks::m_None);
-
-    TEST_ASSERT(0x4000, Math::float16::Exponent_mask::MS_bit::m_Bit);
-    TEST_ASSERT(0xbfff, Math::float16::Exponent_mask::MS_bit::m_Bit_inv);
-    TEST_ASSERT(0xc000, Math::float16::Exponent_mask::MS_bit::m_MSE_bits);
-    TEST_ASSERT(0x3fff, Math::float16::Exponent_mask::MS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x7fff, Math::float16::Exponent_mask::MS_bit::m_LSE_bits);
-    TEST_ASSERT(0x8000, Math::float16::Exponent_mask::MS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x0400, Math::float16::Exponent_mask::LS_bit::m_Bit);
-    TEST_ASSERT(0xfbff, Math::float16::Exponent_mask::LS_bit::m_Bit_inv);
-    TEST_ASSERT(0xfc00, Math::float16::Exponent_mask::LS_bit::m_MSE_bits);
-    TEST_ASSERT(0x03ff, Math::float16::Exponent_mask::LS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x07ff, Math::float16::Exponent_mask::LS_bit::m_LSE_bits);
-    TEST_ASSERT(0xf800, Math::float16::Exponent_mask::LS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x7c00, Math::float16::Exponent_mask::m_Mask);
-    TEST_ASSERT(0x001f, Math::float16::Exponent_mask::m_Mask_value);
-
-    /* Significand */
-    TEST_ASSERT(0xffff, Math::float16::Significand_mask::Masks::m_All);
-    TEST_ASSERT(0x0001, Math::float16::Significand_mask::Masks::m_One);
-    TEST_ASSERT(0x0000, Math::float16::Significand_mask::Masks::m_None);
-
-    TEST_ASSERT(0x0200, Math::float16::Significand_mask::MS_bit::m_Bit);
-    TEST_ASSERT(0xfdff, Math::float16::Significand_mask::MS_bit::m_Bit_inv);
-    TEST_ASSERT(0xfe00, Math::float16::Significand_mask::MS_bit::m_MSE_bits);
-    TEST_ASSERT(0x01ff, Math::float16::Significand_mask::MS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x03ff, Math::float16::Significand_mask::MS_bit::m_LSE_bits);
-    TEST_ASSERT(0xfc00, Math::float16::Significand_mask::MS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x0001, Math::float16::Significand_mask::LS_bit::m_Bit);
-    TEST_ASSERT(0xfffe, Math::float16::Significand_mask::LS_bit::m_Bit_inv);
-    TEST_ASSERT(0xffff, Math::float16::Significand_mask::LS_bit::m_MSE_bits);
-    TEST_ASSERT(0x0000, Math::float16::Significand_mask::LS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x0001, Math::float16::Significand_mask::LS_bit::m_LSE_bits);
-    TEST_ASSERT(0xfffe, Math::float16::Significand_mask::LS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x03ff, Math::float16::Significand_mask::m_Mask);
-    TEST_ASSERT(0x03ff, Math::float16::Significand_mask::m_Mask_value);
+    auto& desc = glyph.Get_descriptor();
+    TEST_ASSERT(0, desc.m_width);
+    TEST_ASSERT(0, desc.m_height);
+    TEST_ASSERT(0, desc.m_left);
+    TEST_ASSERT(0, desc.m_top);
+    TEST_ASSERT(0, desc.m_right);
+    TEST_ASSERT(0, desc.m_bottom);
+    TEST_ASSERT(0, desc.m_horizontal_advance);
+    TEST_ASSERT(0, desc.m_vertical_advance);
 
     return Passed;
 }
 
-UNIT_TEST(Float32_constants)
+UNIT_TEST(Text_glyph_init)
 {
-    TEST_ASSERT(true, Math::float32::m_Has_sign);
+    Text::Glyph glyph;
+    const Text::Glyph::Descriptor init_desc = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    const size_t size = 32;
+    const auto ptr = new Platform::uint8[size];
 
-    /* Sign */
-    TEST_ASSERT(0x80000000, Math::float32::Sign_bit::m_Bit);
-    TEST_ASSERT(0x7fffffff, Math::float32::Sign_bit::m_Bit_inv);
-    TEST_ASSERT(0x80000000, Math::float32::Sign_bit::m_MSE_bits);
-    TEST_ASSERT(0x7fffffff, Math::float32::Sign_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0xffffffff, Math::float32::Sign_bit::m_LSE_bits);
-    TEST_ASSERT(0x00000000, Math::float32::Sign_bit::m_LSE_inv_bits);
-
-    /* Exponent */
-    TEST_ASSERT(0xffffffff, Math::float32::Exponent_mask::Masks::m_All);
-    TEST_ASSERT(0x00000001, Math::float32::Exponent_mask::Masks::m_One);
-    TEST_ASSERT(0x00000000, Math::float32::Exponent_mask::Masks::m_None);
-
-    TEST_ASSERT(0x40000000, Math::float32::Exponent_mask::MS_bit::m_Bit);
-    TEST_ASSERT(0xbfffffff, Math::float32::Exponent_mask::MS_bit::m_Bit_inv);
-    TEST_ASSERT(0xc0000000, Math::float32::Exponent_mask::MS_bit::m_MSE_bits);
-    TEST_ASSERT(0x3fffffff, Math::float32::Exponent_mask::MS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x7fffffff, Math::float32::Exponent_mask::MS_bit::m_LSE_bits);
-    TEST_ASSERT(0x80000000, Math::float32::Exponent_mask::MS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x00800000, Math::float32::Exponent_mask::LS_bit::m_Bit);
-    TEST_ASSERT(0xff7fffff, Math::float32::Exponent_mask::LS_bit::m_Bit_inv);
-    TEST_ASSERT(0xff800000, Math::float32::Exponent_mask::LS_bit::m_MSE_bits);
-    TEST_ASSERT(0x007fffff, Math::float32::Exponent_mask::LS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x00ffffff, Math::float32::Exponent_mask::LS_bit::m_LSE_bits);
-    TEST_ASSERT(0xff000000, Math::float32::Exponent_mask::LS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x7f800000, Math::float32::Exponent_mask::m_Mask);
-    TEST_ASSERT(0x000000ff, Math::float32::Exponent_mask::m_Mask_value);
-
-    /* Significand */
-    TEST_ASSERT(0xffffffff, Math::float32::Significand_mask::Masks::m_All);
-    TEST_ASSERT(0x00000001, Math::float32::Significand_mask::Masks::m_One);
-    TEST_ASSERT(0x00000000, Math::float32::Significand_mask::Masks::m_None);
-
-    TEST_ASSERT(0x00400000, Math::float32::Significand_mask::MS_bit::m_Bit);
-    TEST_ASSERT(0xffbfffff, Math::float32::Significand_mask::MS_bit::m_Bit_inv);
-    TEST_ASSERT(0xffc00000, Math::float32::Significand_mask::MS_bit::m_MSE_bits);
-    TEST_ASSERT(0x003fffff, Math::float32::Significand_mask::MS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x007fffff, Math::float32::Significand_mask::MS_bit::m_LSE_bits);
-    TEST_ASSERT(0xff800000, Math::float32::Significand_mask::MS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x00000001, Math::float32::Significand_mask::LS_bit::m_Bit);
-    TEST_ASSERT(0xfffffffe, Math::float32::Significand_mask::LS_bit::m_Bit_inv);
-    TEST_ASSERT(0xffffffff, Math::float32::Significand_mask::LS_bit::m_MSE_bits);
-    TEST_ASSERT(0x00000000, Math::float32::Significand_mask::LS_bit::m_MSE_inv_bits);
-    TEST_ASSERT(0x00000001, Math::float32::Significand_mask::LS_bit::m_LSE_bits);
-    TEST_ASSERT(0xfffffffe, Math::float32::Significand_mask::LS_bit::m_LSE_inv_bits);
-
-    TEST_ASSERT(0x007fffff, Math::float32::Significand_mask::m_Mask);
-    TEST_ASSERT(0x007fffff, Math::float32::Significand_mask::m_Mask_value);
-
-    return Passed;
-}
-
-UNIT_TEST(Float64_constants)
-{
-    TEST_ASSERT(true, Math::float64::m_Has_sign);
-
-    /* Sign */
-    TEST_ASSERT(0x8000000000000000, Math::float64::Sign_bit::m_Bit);                          
-    TEST_ASSERT(0x7fffffffffffffff, Math::float64::Sign_bit::m_Bit_inv);                      
-    TEST_ASSERT(0x8000000000000000, Math::float64::Sign_bit::m_MSE_bits);                     
-    TEST_ASSERT(0x7fffffffffffffff, Math::float64::Sign_bit::m_MSE_inv_bits);                 
-    TEST_ASSERT(0xffffffffffffffff, Math::float64::Sign_bit::m_LSE_bits);                     
-    TEST_ASSERT(0x0000000000000000, Math::float64::Sign_bit::m_LSE_inv_bits);                 
-
-    /* Exponent */
-    TEST_ASSERT(0xffffffffffffffff, Math::float64::Exponent_mask::Masks::m_All);              
-    TEST_ASSERT(0x0000000000000001, Math::float64::Exponent_mask::Masks::m_One);
-    TEST_ASSERT(0x0000000000000000, Math::float64::Exponent_mask::Masks::m_None);
-
-    TEST_ASSERT(0x4000000000000000, Math::float64::Exponent_mask::MS_bit::m_Bit);             
-    TEST_ASSERT(0xbfffffffffffffff, Math::float64::Exponent_mask::MS_bit::m_Bit_inv);         
-    TEST_ASSERT(0xc000000000000000, Math::float64::Exponent_mask::MS_bit::m_MSE_bits);        
-    TEST_ASSERT(0x3fffffffffffffff, Math::float64::Exponent_mask::MS_bit::m_MSE_inv_bits);    
-    TEST_ASSERT(0x7fffffffffffffff, Math::float64::Exponent_mask::MS_bit::m_LSE_bits);        
-    TEST_ASSERT(0x8000000000000000, Math::float64::Exponent_mask::MS_bit::m_LSE_inv_bits);    
-
-    TEST_ASSERT(0x0010000000000000, Math::float64::Exponent_mask::LS_bit::m_Bit);             
-    TEST_ASSERT(0xffefffffffffffff, Math::float64::Exponent_mask::LS_bit::m_Bit_inv);         
-    TEST_ASSERT(0xfff0000000000000, Math::float64::Exponent_mask::LS_bit::m_MSE_bits);        
-    TEST_ASSERT(0x000fffffffffffff, Math::float64::Exponent_mask::LS_bit::m_MSE_inv_bits);    
-    TEST_ASSERT(0x001fffffffffffff, Math::float64::Exponent_mask::LS_bit::m_LSE_bits);        
-    TEST_ASSERT(0xffe0000000000000, Math::float64::Exponent_mask::LS_bit::m_LSE_inv_bits);    
-
-    TEST_ASSERT(0x7ff0000000000000, Math::float64::Exponent_mask::m_Mask);
-    TEST_ASSERT(0x00000000000007ff, Math::float64::Exponent_mask::m_Mask_value);
-
-    /* Significand */
-    TEST_ASSERT(0xffffffffffffffff, Math::float64::Significand_mask::Masks::m_All);           
-    TEST_ASSERT(0x0000000000000001, Math::float64::Significand_mask::Masks::m_One);
-    TEST_ASSERT(0x0000000000000000, Math::float64::Significand_mask::Masks::m_None);
-
-    TEST_ASSERT(0x0008000000000000, Math::float64::Significand_mask::MS_bit::m_Bit);          
-    TEST_ASSERT(0xfff7ffffffffffff, Math::float64::Significand_mask::MS_bit::m_Bit_inv);      
-    TEST_ASSERT(0xfff8000000000000, Math::float64::Significand_mask::MS_bit::m_MSE_bits);     
-    TEST_ASSERT(0x0007ffffffffffff, Math::float64::Significand_mask::MS_bit::m_MSE_inv_bits); 
-    TEST_ASSERT(0x000fffffffffffff, Math::float64::Significand_mask::MS_bit::m_LSE_bits);     
-    TEST_ASSERT(0xfff0000000000000, Math::float64::Significand_mask::MS_bit::m_LSE_inv_bits); 
-
-    TEST_ASSERT(0x0000000000000001, Math::float64::Significand_mask::LS_bit::m_Bit);          
-    TEST_ASSERT(0xfffffffffffffffe, Math::float64::Significand_mask::LS_bit::m_Bit_inv);      
-    TEST_ASSERT(0xffffffffffffffff, Math::float64::Significand_mask::LS_bit::m_MSE_bits);     
-    TEST_ASSERT(0x0000000000000000, Math::float64::Significand_mask::LS_bit::m_MSE_inv_bits); 
-    TEST_ASSERT(0x0000000000000001, Math::float64::Significand_mask::LS_bit::m_LSE_bits);     
-    TEST_ASSERT(0xfffffffffffffffe, Math::float64::Significand_mask::LS_bit::m_LSE_inv_bits); 
-
-    TEST_ASSERT(0x000fffffffffffff, Math::float64::Significand_mask::m_Mask);
-    TEST_ASSERT(0x000fffffffffffff, Math::float64::Significand_mask::m_Mask_value);
-
-    return Passed;
-}
-
-UNIT_TEST(Float_usage)
-{
-    static const double values[] =
+    if (nullptr == ptr)
     {
-        123.456,
-        0.0,
-        1.0,
-        -0.0,
-        -1.0
-    };
-    static const size_t n_values = sizeof(values) / sizeof(values[0]);
-
-    for (size_t i = 0; i < n_values; ++i)
-    {
-        const float val = float(values[i]);
-        const Math::float32 f(values[i]);
-
-        TEST_ASSERT(0, memcmp(&val, &(f.m_Raw), sizeof(float)));
-
-        const double d_val(val);
-        const double d_f(f.Value());
-
-        TEST_ASSERT(d_val, d_f);
+        return NotAvailable;
     }
+    for (size_t i = 0; i < size; ++i)
+    {
+        ptr[i] = Platform::uint8(i);
+    }
+
+    Memory::Binary_data init_data(ptr, size);
+
+    glyph.Init(std::move(init_data), init_desc);
+
+    {
+        auto& data = glyph.Get_data();
+        TEST_ASSERT(true, init_data.Is_null());
+        TEST_ASSERT(false, data.Is_null());
+        for (size_t i = 0; i < size; ++i)
+        {
+            TEST_ASSERT(Platform::uint8(i), data.Data()[i]);
+        }
+
+        auto& desc = glyph.Get_descriptor();
+        TEST_ASSERT(init_desc.m_width, desc.m_width);
+        TEST_ASSERT(init_desc.m_height, desc.m_height);
+        TEST_ASSERT(init_desc.m_left, desc.m_left);
+        TEST_ASSERT(init_desc.m_top, desc.m_top);
+        TEST_ASSERT(init_desc.m_right, desc.m_right);
+        TEST_ASSERT(init_desc.m_bottom, desc.m_bottom);
+        TEST_ASSERT(init_desc.m_horizontal_advance, desc.m_horizontal_advance);
+        TEST_ASSERT(init_desc.m_vertical_advance, desc.m_vertical_advance);
+    }
+
+    /* Copy */
+    {
+        auto glyph_b(glyph);
+
+        Text::Glyph glyph_c;
+        glyph_c = glyph_b;
+
+        auto& data = glyph.Get_data();
+        TEST_ASSERT(false, data.Is_null());
+        for (size_t i = 0; i < size; ++i)
+        {
+            TEST_ASSERT(Platform::uint8(i), data.Data()[i]);
+        }
+
+        auto& desc = glyph.Get_descriptor();
+        TEST_ASSERT(init_desc.m_width, desc.m_width);
+        TEST_ASSERT(init_desc.m_height, desc.m_height);
+        TEST_ASSERT(init_desc.m_left, desc.m_left);
+        TEST_ASSERT(init_desc.m_top, desc.m_top);
+        TEST_ASSERT(init_desc.m_right, desc.m_right);
+        TEST_ASSERT(init_desc.m_bottom, desc.m_bottom);
+        TEST_ASSERT(init_desc.m_horizontal_advance, desc.m_horizontal_advance);
+        TEST_ASSERT(init_desc.m_vertical_advance, desc.m_vertical_advance);
+
+        auto& data_b = glyph_b.Get_data();
+        TEST_ASSERT(false, data_b.Is_null());
+        for (size_t i = 0; i < size; ++i)
+        {
+            TEST_ASSERT(Platform::uint8(i), data_b.Data()[i]);
+        }
+
+        auto& desc_b = glyph_b.Get_descriptor();
+        TEST_ASSERT(init_desc.m_width, desc_b.m_width);
+        TEST_ASSERT(init_desc.m_height, desc_b.m_height);
+        TEST_ASSERT(init_desc.m_left, desc_b.m_left);
+        TEST_ASSERT(init_desc.m_top, desc_b.m_top);
+        TEST_ASSERT(init_desc.m_right, desc_b.m_right);
+        TEST_ASSERT(init_desc.m_bottom, desc_b.m_bottom);
+        TEST_ASSERT(init_desc.m_horizontal_advance, desc_b.m_horizontal_advance);
+        TEST_ASSERT(init_desc.m_vertical_advance, desc_b.m_vertical_advance);
+
+        auto& data_c = glyph_c.Get_data();
+        TEST_ASSERT(false, data_c.Is_null());
+        for (size_t i = 0; i < size; ++i)
+        {
+            TEST_ASSERT(Platform::uint8(i), data_c.Data()[i]);
+        }
+
+        auto& desc_c = glyph_c.Get_descriptor();
+        TEST_ASSERT(init_desc.m_width, desc_c.m_width);
+        TEST_ASSERT(init_desc.m_height, desc_c.m_height);
+        TEST_ASSERT(init_desc.m_left, desc_c.m_left);
+        TEST_ASSERT(init_desc.m_top, desc_c.m_top);
+        TEST_ASSERT(init_desc.m_right, desc_c.m_right);
+        TEST_ASSERT(init_desc.m_bottom, desc_c.m_bottom);
+        TEST_ASSERT(init_desc.m_horizontal_advance, desc_c.m_horizontal_advance);
+        TEST_ASSERT(init_desc.m_vertical_advance, desc_c.m_vertical_advance);
+    }
+
+    /* Move */
+    {
+        auto glyph_b(glyph);
+
+        auto glyph_c(std::move(glyph_b));
+
+        auto& data_b = glyph_b.Get_data();
+        TEST_ASSERT(true, data_b.Is_null());
+
+        auto& desc_b = glyph_b.Get_descriptor();
+        TEST_ASSERT(0, desc_b.m_width);
+        TEST_ASSERT(0, desc_b.m_height);
+        TEST_ASSERT(0, desc_b.m_left);
+        TEST_ASSERT(0, desc_b.m_top);
+        TEST_ASSERT(0, desc_b.m_right);
+        TEST_ASSERT(0, desc_b.m_bottom);
+        TEST_ASSERT(0, desc_b.m_horizontal_advance);
+        TEST_ASSERT(0, desc_b.m_vertical_advance);
+
+        auto& data_c = glyph_c.Get_data();
+        TEST_ASSERT(false, data_c.Is_null());
+        for (size_t i = 0; i < size; ++i)
+        {
+            TEST_ASSERT(Platform::uint8(i), data_c.Data()[i]);
+        }
+
+        auto& desc_c = glyph_c.Get_descriptor();
+        TEST_ASSERT(init_desc.m_width, desc_c.m_width);
+        TEST_ASSERT(init_desc.m_height, desc_c.m_height);
+        TEST_ASSERT(init_desc.m_left, desc_c.m_left);
+        TEST_ASSERT(init_desc.m_top, desc_c.m_top);
+        TEST_ASSERT(init_desc.m_right, desc_c.m_right);
+        TEST_ASSERT(init_desc.m_bottom, desc_c.m_bottom);
+        TEST_ASSERT(init_desc.m_horizontal_advance, desc_c.m_horizontal_advance);
+        TEST_ASSERT(init_desc.m_vertical_advance, desc_c.m_vertical_advance);
+    }
+    
+    glyph.Release();
+    {
+        auto& data = glyph.Get_data();
+        TEST_ASSERT(true, data.Is_null());
+
+        auto& desc = glyph.Get_descriptor();
+        TEST_ASSERT(0, desc.m_width);
+        TEST_ASSERT(0, desc.m_height);
+        TEST_ASSERT(0, desc.m_left);
+        TEST_ASSERT(0, desc.m_top);
+        TEST_ASSERT(0, desc.m_right);
+        TEST_ASSERT(0, desc.m_bottom);
+        TEST_ASSERT(0, desc.m_horizontal_advance);
+        TEST_ASSERT(0, desc.m_vertical_advance);
+    }
+
+    return Passed;
+}
+
+UNIT_TEST(Text_font_initial_state)
+{
+    Text::Font font;
+
+    TEST_ASSERT((Text::Glyph *) 0, font.Get_glyph(0));
+
+    TEST_ASSERT((Text::Glyph::Descriptor *) 0, font.Get_max());
+
+    return Passed;
+}
+
+UNIT_TEST(Text_font_init)
+{
+    const Text::Glyph::Descriptor desc_0 = { 4, 4, 0, 2, 4, -2, 4, -6 };
+    const Text::Glyph::Descriptor desc_1 = { 6, 4, 2, 4, 8, 0, 8, -6 };
+
+    Text::Font font;
+    Text::Font font_b;
+
+    {
+        const size_t desc_size = sizeof(Text::Glyph::Descriptor);
+        const size_t nog = 2;
+        const size_t char_size = nog * sizeof(Platform::uint32);
+        const size_t descs_size = nog * desc_size;
+        const size_t img_offs_size = nog * sizeof(Platform::uint64);
+
+        const size_t img_0_size = desc_0.m_width * desc_0.m_height;
+        const size_t img_1_size = desc_1.m_width * desc_1.m_height;
+        const size_t imgs_size = img_0_size + img_1_size;
+
+        const size_t total_size =
+            sizeof(Platform::uint32) /* nog */
+            + char_size
+            + descs_size
+            + img_offs_size
+            + imgs_size;
+
+        auto ptr = new Platform::uint8[total_size];
+
+        /* NOG */
+        Memory::Access::Write(ptr, 0, nog);
+
+        /* Characters */
+        const size_t off_char = sizeof(Platform::uint32);
+        Memory::Access::Write(ptr, off_char, Platform::uint32(0));
+        Memory::Access::Write(ptr, off_char + sizeof(Platform::uint32), Platform::uint32(1));
+
+        /* Descriptors */
+        const size_t off_descs = off_char + nog * sizeof(Platform::uint32);
+        Memory::Access::Write(ptr, off_descs, desc_0);
+        Memory::Access::Write(ptr, off_descs + desc_size, desc_0);
+
+        /* Img offsets */
+        const size_t off_img_offs = off_descs + nog * desc_size;
+        Memory::Access::Write(ptr, off_img_offs, Platform::uint64(total_size - imgs_size));
+        Memory::Access::Write(ptr, off_img_offs + sizeof(Platform::uint64), Platform::uint64(total_size - img_1_size));
+
+        /* Img data */
+        for (size_t i = 0; i < desc_0.m_width * desc_0.m_height; ++i)
+        {
+            ptr[off_img_offs + i] = 0;
+        }
+        for (size_t i = 0; i < desc_1.m_width * desc_1.m_height; ++i)
+        {
+            ptr[off_img_offs + img_0_size + i] = 1;
+        }
+
+        Memory::Binary_data data(ptr, total_size);
+        if (Utilities::Success != font.Init(std::move(data), false))
+        {
+            return NotAvailable;
+        }
+    }
+
+    {
+        auto max = font.Get_max();
+        TEST_ASSERT_NOT_EQUAL((Text::Glyph::Descriptor *) 0, max);
+
+        TEST_ASSERT(6, max->m_width);
+        TEST_ASSERT(4, max->m_height);
+        TEST_ASSERT(0, max->m_left);
+        TEST_ASSERT(4, max->m_top);
+        TEST_ASSERT(8, max->m_right);
+        TEST_ASSERT(-2, max->m_bottom);
+        TEST_ASSERT(8, max->m_horizontal_advance);
+        TEST_ASSERT(-6, max->m_vertical_advance);
+
+        {
+            auto glyph = font.Get_glyph(0);
+            TEST_ASSERT_NOT_EQUAL((Text::Glyph *) 0, glyph);
+
+            auto& desc = glyph->Get_descriptor();
+            TEST_ASSERT(desc_0.m_width, desc.m_width);
+            TEST_ASSERT(desc_0.m_height, desc.m_height);
+            TEST_ASSERT(desc_0.m_left, desc.m_left);
+            TEST_ASSERT(desc_0.m_top, desc.m_top);
+            TEST_ASSERT(desc_0.m_right, desc.m_right);
+            TEST_ASSERT(desc_0.m_bottom, desc.m_bottom);
+            TEST_ASSERT(desc_0.m_horizontal_advance, desc.m_horizontal_advance);
+            TEST_ASSERT(desc_0.m_vertical_advance, desc.m_vertical_advance);
+
+            auto& data = glyph->Get_data();
+            TEST_ASSERT(false, data.Is_null());
+
+            for (size_t i = 0; i < desc.m_width * desc.m_height; ++i)
+            {
+                TEST_ASSERT(Platform::uint8(0), data.Data()[i]);
+            }
+        }
+
+        {
+            auto glyph = font.Get_glyph(1);
+            TEST_ASSERT_NOT_EQUAL((Text::Glyph *) 0, glyph);
+
+            auto& desc = glyph->Get_descriptor();
+            TEST_ASSERT(desc_1.m_width, desc.m_width);
+            TEST_ASSERT(desc_1.m_height, desc.m_height);
+            TEST_ASSERT(desc_1.m_left, desc.m_left);
+            TEST_ASSERT(desc_1.m_top, desc.m_top);
+            TEST_ASSERT(desc_1.m_right, desc.m_right);
+            TEST_ASSERT(desc_1.m_bottom, desc.m_bottom);
+            TEST_ASSERT(desc_1.m_horizontal_advance, desc.m_horizontal_advance);
+            TEST_ASSERT(desc_1.m_vertical_advance, desc.m_vertical_advance);
+
+            auto& data = glyph->Get_data();
+            TEST_ASSERT(false, data.Is_null());
+
+            for (size_t i = 0; i < desc.m_width * desc.m_height; ++i)
+            {
+                TEST_ASSERT(Platform::uint8(1), data.Data()[i]);
+            }
+        }
+
+        for (size_t i = 0; i < TEXT_FONT_CHAR_LUT_SIZE; ++i)
+        {
+            auto glyph = font.Get_glyph(2);
+            TEST_ASSERT((Text::Glyph *) 0, glyph);
+        }
+    }
+
+    font_b = std::move(font);
+    {
+        auto max = font.Get_max();
+        auto max_b = font_b.Get_max();
+        TEST_ASSERT((Text::Glyph::Descriptor *) 0, max);
+        TEST_ASSERT_NOT_EQUAL((Text::Glyph::Descriptor *) 0, max_b);
+    }
+
+    static const Text::Box boxes[] = {
+        { 0, 0, 2, -2 },
+        { 0, 0, 4, -4 },
+        { 0, 0, 4, -4 },
+        { 0, 0, 6, -4 },
+        { 0, 0, 6, -12 },
+        { 0, 0, 12, -4 },
+    };
+    static const size_t boxes_count = sizeof(boxes) / sizeof(boxes[0]);
+    Text::Font::character_t text[] = { 0, 1, 0, 1, 0, 1, 0 };
+    static const size_t text_count = sizeof(text) / sizeof(text[0]);
+    Text::Layout layout = { 0 };
+    auto ret = Text::Init_layout(font_b, boxes, boxes_count, text, text_count, layout);
 
     return Passed;
 }

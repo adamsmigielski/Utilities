@@ -8,12 +8,11 @@ ADD_LIBRARY (text STATIC
 			 Layout.hpp
 			 Layout.cpp
 			 PCH.cpp
-			 PCH.hpp
-			 test.cpp )
+			 PCH.hpp )
 
 SET_TARGET_PROPERTIES ( text PROPERTIES DEFINE_SYMBOL "TEXT_PROJECT_DLL" )
 
-TARGET_LINK_LIBRARIES ( text Common )
+TARGET_LINK_LIBRARIES ( text Common memory )
 
 # Test
 IF (BUILD_TESTS)

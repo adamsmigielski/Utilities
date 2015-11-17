@@ -26,236 +26,240 @@
 
 /**
 * @author Adam Œmigielski
-* @file Float.hpp
+* @file Layout.cpp
 **/
 
-#ifndef MATH_FLOAT_HPP
-#define MATH_FLOAT_HPP
+#include "PCH.hpp"
+#include "Layout.hpp"
+#include "Glyph.hpp"
 
-#include <Utilities\basic\ErrorCodes.hpp>
-#include <Utilities\helpers\Bits.hpp>
-#include <Utilities\helpers\Type.hpp>
+#include <Utilities\containers\PointerContainer.hpp>
 
-namespace Math
+#include <list>
+
+namespace Text
 {
-    template <
-        typename T,
-        unsigned int sign_bits,
-        unsigned int exponent_bits,
-        unsigned int exponent_bias,
-        unsigned int significand_bits >
-    class Float
+    using position_list = std::list < Glyph_position * >;
+
+    static void return_cursor_in_line(
+        const Box & box,
+        Platform::int32 & x)
     {
-    public:
-        typedef T Base_type;
-        typedef Helpers::Masks < T > Masks;
-        typedef Helpers::Type < T > Type;
-        typedef Helpers::Bit <
-            Base_type,
-            exponent_bits + significand_bits >
-            Sign_bit;
-        typedef Helpers::Mask <
-            Base_type,
-            exponent_bits + significand_bits - 1,
-            significand_bits>
-            Exponent_mask;
-        typedef Helpers::Mask <
-            Base_type,
-            significand_bits - 1,
-            0>
-            Significand_mask;
+        x = box.m_Left;
+    }
 
+    static void return_cursor_in_row(
+        const Box & box,
+        const Glyph::Descriptor & max,
+        Platform::int32 & y)
+    {
+        y = box.m_Top - max.m_top;
+    }
 
-        Float()
-            : m_Raw(0)
+    static void start_new_box(
+        const Box & box,
+        const Glyph::Descriptor & max,
+        Platform::int32 & x,
+        Platform::int32 & y)
+    {
+        return_cursor_in_line(box, x);
+        return_cursor_in_row(box, max, y);
+    }
+
+    static void advance_cursor_in_line(
+        const Glyph::Descriptor & descriptor,
+        Platform::int32 & x)
+    {
+        x += descriptor.m_horizontal_advance;
+    }
+
+    static void advance_cursor_in_row(
+        const Glyph::Descriptor & descriptor,
+        Platform::int32 & y)
+    {
+        y += descriptor.m_vertical_advance;
+    }
+
+    static bool does_glyph_fit_horizontally(
+        const Box & box,
+        const Glyph::Descriptor & descriptor,
+        Platform::int32 & x)
+    {
+        const auto left = box.m_Right - x;
+
+        return left >= descriptor.m_right;
+    }
+
+    static bool does_glyph_fit_vertically(
+        const Box & box,
+        const Glyph::Descriptor & descriptor,
+        Platform::int32 & y)
+    {
+        const auto left = y - box.m_Bottom;
+
+        return left >= -descriptor.m_bottom;
+    }
+
+    static Glyph_position * add_glyph_position(
+        const Box * box,
+        const Platform::int32 x,
+        const Platform::int32 y,
+        const Glyph * glyph,
+        position_list & list)
+    {
+        /* Allocate and init */
+        auto ptr = new Glyph_position;
+        if (nullptr == ptr)
         {
+            ASSERT(0);
+            return nullptr;
         }
-        Float(const Float & _float)
-            : m_Raw(_float.m_Raw)
-        {
-        }
-        Float(const Base_type & raw)
-            : m_Raw(raw)
-        {
-        }
-        Float(const double & value)
-        {
-            Value(value);
-        }
 
-        static typename Type::difference_type Get_exponent(const Base_type & raw)
+        ptr->m_Box = box;
+        ptr->m_X = x;
+        ptr->m_Y = y;
+        ptr->m_Glyph = glyph;
+
+        /* Store ptr on list */
+        list.push_back(ptr);
+
+        /* Done */
+        return ptr;
+    }
+
+    static void release_resources(
+        position_list & positions)
+    {
+        Containers::PointerContainer::Remove_all(positions);
+    }
+
+    Platform::int32 Init_layout(
+        const Font & font,
+        const Box * boxes,
+        const Platform::uint32 boxes_count,
+        const Font::character_t * text,
+        const Platform::uint32 characters_count,
+        Layout & layout)
+    {
+        if ((nullptr == boxes) ||
+            (nullptr == text)  ||
+            (0 == boxes_count) ||
+            (0 == characters_count))
         {
-            const typename Type::difference_type raw_exponent( Exponent_mask::Get(raw));
-            const typename Type::difference_type biased_exponent(raw_exponent - m_Exponent_bias);
-
-            return biased_exponent;
-        }
-
-        static Base_type Set_exponent(
-            const typename Type::difference_type & exponent,
-            const Base_type & raw)
-        {
-            const Base_type biased_exponent(exponent + m_Exponent_bias);
-
-            return Exponent_mask::Set(biased_exponent, raw);
-        }
-
-        static Base_type Get_significand(const Base_type & raw)
-        {
-            return Significand_mask::Get(raw);
-        }
-
-        static Base_type Set_significand(
-            const Base_type & significand,
-            const Base_type & raw)
-        {
-            return Significand_mask::Set(significand, raw);
+            return Utilities::Invalid_parameter;
         }
 
-        static Base_type Get_sign(const Base_type & raw)
+        auto max = font.Get_max();
+        if (nullptr == max)
         {
-            Base_type sign = 0;
+            return Utilities::Invalid_object;
+        }
 
-            if (true == m_Has_sign)
+        position_list positions;
+
+        Platform::uint32 current_box_index = 0;
+        Platform::uint32 current_char_index = 0;
+
+        do
+        {
+            auto current_box = boxes + current_box_index;
+
+            Platform::int32 cursor_x = 0;
+            Platform::int32 cursor_y = 0;
+
+            start_new_box(*current_box, *max, cursor_x, cursor_y);
+            
+            for (; current_char_index < characters_count; ++current_char_index)
             {
-                sign = Sign_bit::Get(raw);
-            }
+                const auto character = text[current_char_index];
 
-            return sign;
-        }
+                const Glyph * glyph = font.Get_glyph(character);
+                const auto& descriptor = glyph->Get_descriptor();
 
-        static Base_type Set_sign(
-            const Base_type & sign,
-            const Base_type & raw)
-        {
-            Base_type result = 0;
-
-            if (true == m_Has_sign)
-            {
-                result = Sign_bit::Set(sign, raw);
-            }
-
-            return result;
-        }
-
-        Platform::int32 Value(const double & value)
-        {
-            auto base_64     = (typename float64::Base_type *) &value;
-            auto exponent_64 = float64::Get_exponent(*base_64);
-
-            if (m_Exponent_max < exponent_64)
-            {
-                return Utilities::Invalid_parameter;
-            }
-
-            auto sign_64        = float64::Get_sign       (*base_64);
-            auto significand_64 = float64::Get_significand(*base_64);
-
-            auto exponent    = exponent_64;
-            auto sign        = Float::Base_type(sign_64);
-            auto significand = Float::Base_type(significand_64 >> m_Significand_shift);
-            auto point       = significand_64 & ((float64::Masks::m_One << m_Significand_shift) >> 1);
-
-            if (-Type::difference_type(m_Exponent_bias) > exponent_64)
-            {
-                exponent = -Type::difference_type(m_Exponent_bias);
-            }
-
-            if (0 != point)
-            {
-                auto half_bits = significand_64 & ( (~ (float64::Masks::m_All << m_Significand_shift) ) >> 1);
-
-                if (0 != half_bits)
+                /* Fit glyph */
+                if (false == does_glyph_fit_vertically(*current_box, descriptor, cursor_y))
                 {
-                    significand += 1;
+                    break /* Go to another box */;
+                }
+
+                if (false == does_glyph_fit_horizontally(*current_box, descriptor, cursor_x))
+                {
+                    /* Go to next line */
+                    return_cursor_in_line(*current_box, cursor_x);
+                    advance_cursor_in_row(*max, cursor_y);
+
+                    if (false == does_glyph_fit_horizontally(*current_box, descriptor, cursor_x))
+                    {
+                        break; /* Go to another box */
+                    }
+                }
+
+                /* Save glyph_usage and position */
+                auto ret = add_glyph_position(                    
+                    current_box,
+                    cursor_x,
+                    cursor_y,
+                    glyph,
+                    positions);
+                if (nullptr == ret)
+                {
+                    ASSERT(0);
+                    release_resources(positions);
+                    return Utilities::Failed_to_allocate_memory;
                 }
             }
 
-
-            m_Raw = 
-                Set_significand(
-                    significand,
-                    Set_exponent(
-                        exponent,
-                        Set_sign(
-                            sign,
-                            Float::Base_type(0)
-                        )
-                    )
-                );
-
-            return Utilities::Success;
-        }
-
-        double Value() const
-        {
-            auto exponent    = Float::Get_exponent(m_Raw);
-            auto sign        = Float::Get_sign(m_Raw);
-            auto significand = Float::Get_significand(m_Raw);
-
-            float64::Type::difference_type exponent_64(exponent);
-            float64::Base_type             sign_64(sign);
-            float64::Base_type             significand_64 =
-                float64::Base_type(significand) << m_Significand_shift;
-
-            if (exponent == -Float::Type::difference_type(m_Exponent_bias))
+            /* All characters done */
+            if (current_char_index != characters_count)
             {
-                exponent_64 = -Float::Type::difference_type(float64::m_Exponent_bias);
+                ++current_box_index;
+            }
+            else
+            {
+                break;
+            }
+        } while (current_box_index < boxes_count);
+
+        /* Store results */
+        {
+            auto ptr = new Glyph_position *[current_char_index];
+            if (nullptr == ptr)
+            {
+                ASSERT(0);
+                release_resources(positions);
+                return Utilities::Failed_to_allocate_memory;
             }
 
-            float64::Base_type base_64 =
-                float64::Set_significand(
-                    significand_64,
-                    float64::Set_exponent(
-                        exponent_64,
-                        float64::Set_sign(
-                            sign_64,
-                            float64::Base_type(0)
-                        )
-                    )
-                );
+            Release_layout(layout);
 
-            double result = *(double *) &base_64;
+            layout.m_Positions = ptr;
+            layout.m_Count = current_char_index;
+            Platform::uint32 index = 0;
 
-            return result;
+            for (auto it : positions)
+            {
+                ptr[index] = it;
+            }
         }
 
-        Base_type m_Raw;
+        if (current_char_index != characters_count)
+        {
+            return Not_enough_space;
+        }
 
-        /* Constants */
-        static const bool m_Has_sign = (0 == sign_bits)
-                                     ? false
-                                     : true;;
-        static const Base_type          m_Exponent_bias           = Base_type(exponent_bias);
-        static const Base_type          m_Exponent_max            = Exponent_mask::m_Mask_value - m_Exponent_bias - 1;
-        static const Base_type          m_Significand_max         = Significand_mask::m_Mask_value;
-        static const Base_type          m_Significand_shift       = float64::Significand_mask::m_Mask_length - Significand_mask::m_Mask_length;
-    };
+        return Utilities::Success;
+    }
 
+    void Release_layout(Layout & layout)
+    {
+        for (size_t i = 0; i < layout.m_Count; ++i)
+        {
+            delete layout.m_Positions[i];
+            layout.m_Positions[i] = nullptr;
+        }
 
-
-    typedef Float <
-        Platform::uint16 /* base */,
-        1                /* sign */,
-        5                /* exponent bits */,
-        15               /* exponent bias */,
-        10               /* significand bits */
-    > float16;
-    typedef float16 half;
-    typedef Float <
-        Platform::uint32 /* base */,
-        1                /* sign */,
-        8                /* exponent bits */,
-        127              /* exponent bias */,
-        23               /* significand bits */
-    > float32;
-    typedef Float <
-        Platform::uint64 /* base */,
-        1                /* sign */,
-        11               /* exponent bits */,
-        1023            /* exponent bias */,
-        52               /* significand bits */
-    > float64;
+        delete[] layout.m_Positions;
+        layout.m_Positions = nullptr;
+        layout.m_Count = 0;
+    }
 }
-
-#endif /* MATH_FLOAT_HPP */

@@ -1,6 +1,6 @@
 /** License
 *
-* Copyright (c) 2015 Adam Œmigielski
+* Copyright (c) 2014 Adam Œmigielski
 *
 *
 *  Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,57 +26,24 @@
 
 /**
 * @author Adam Œmigielski
-* @file PointerContainer.hpp
+* @file MemoryAccess.cpp
 **/
 
-#ifndef UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP
-#define UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP
+#include "PCH.hpp"
 
-#include <algorithm>
-
-#include <Utilities\helpers\Type.hpp>
-
-namespace Containers
+namespace Memory
 {
-    namespace PointerContainer
+    namespace Access
     {
-        template <class T>
-        class Operations
+        void Swap_endianess(Platform::int8 & c)
         {
-        public:
-			typedef Helpers::Type<T> type;
-
-            static void Delete_entry(typename type::pointer_reference entry);
-
-            
-        };
-        
-        template <class C>
-        void Remove_all(C & container);
-
-
-
-        template <class T>
-        void Operations<T>::Delete_entry(typename Operations<T>::type::pointer_reference entry)
-        {
-            type::pointer ptr = entry;
-
-            entry = nullptr;
-
-
-            if (nullptr != ptr)
-            {
-                delete ptr;
-            }
+            /* Nothing to be done here */
         }
 
-        template <class C>
-        void Remove_all(C & container)
+        void Swap_endianess(Platform::uint8 & c)
         {
-            std::for_each(container.begin(), container.end(), Operations<typename Helpers::Type<typename C::value_type>::value_type>::Delete_entry);
+            /* Nothing to be done here */
         }
     }
 }
-
-#endif /* UTILITIES_CONTAINERS_POINTER_CONTAINER_HPP */
 

@@ -34,6 +34,36 @@
 
 namespace Text
 {
+    Glyph::Glyph()
+    {
+        m_descriptor = Descriptor{ 0, 0, 0, 0, 0, 0, 0, 0 };
+    }
+
+    Glyph::~Glyph()
+    {
+        Release();
+    }
+
+    Glyph::Glyph(Glyph && glyph)
+    {
+        m_data = std::move(glyph.m_data);
+        m_descriptor = glyph.m_descriptor;
+
+        glyph.Release();
+    }
+
+    Glyph & Glyph::operator = (Glyph && glyph)
+    {
+        Release();
+
+        m_data = std::move(glyph.m_data);
+        m_descriptor = glyph.m_descriptor;
+
+        glyph.Release();
+
+        return *this;
+    }
+
     Platform::int32 Glyph::Init(
         Memory::Binary_data && data,
         const Descriptor & descriptor)
@@ -42,6 +72,8 @@ namespace Text
 
         m_data = std::move(data);
         m_descriptor = descriptor;
+
+        return Utilities::Success;
     }
 
     void Glyph::Release()

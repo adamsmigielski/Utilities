@@ -40,7 +40,7 @@ namespace Memory
         /* Nothing to be done here */
     }
 
-    Binary_data::Binary_data(Platform::uint8 * data, size_t size)
+    Binary_data::Binary_data(Platform::uint8 * data, Platform::uint64 size)
         : m_data(data)
         , m_size(size)
     {
@@ -50,7 +50,10 @@ namespace Memory
     Binary_data::Binary_data(const Binary_data & data)
         : Binary_data()
     {
-        copy(data.m_data, data.m_size);
+        if (Utilities::Success != copy(data.m_data, data.m_size))
+        {
+            Release();
+        }
     }
 
     Binary_data::Binary_data(Binary_data && data)
@@ -87,12 +90,12 @@ namespace Memory
         return m_data;
     }
 
-    size_t Binary_data::Size() const
+    auto Binary_data::Size() const -> size_type
     {
         return m_size;
     }
 
-    Platform::uint8 & Binary_data::operator [] (size_t offset) const
+    Platform::uint8 & Binary_data::operator [] (size_type offset) const
     {
         return *(m_data + offset);
     }
@@ -108,7 +111,22 @@ namespace Memory
         m_size = 0;
     }
 
-    void Binary_data::Reset(Platform::uint8 * data, size_t size)
+    Platform::int32 Binary_data::Copy_range(
+        const Binary_data & data,
+        Binary_data::size_type offset,
+        Binary_data::size_type size)
+    {
+        if (true == data.Is_null())
+        {
+            return Utilities::Invalid_parameter;
+        }
+
+        Release();
+
+        return copy(data.m_data + offset, size);
+    }
+
+    void Binary_data::Reset(Platform::uint8 * data, size_type size)
     {
         Release();
 
@@ -121,20 +139,22 @@ namespace Memory
         return (nullptr == m_data);
     }
 
-    void Binary_data::copy(Platform::uint8 * data, size_t size)
+    Platform::int32 Binary_data::copy(Platform::uint8 * data, size_type size)
     {
-        auto ptr = new Platform::uint8[size];
+        auto ptr = new Platform::uint8[size_t(size)];
 
         if (nullptr == ptr)
         {
-            ERRLOG("Memory allocation failure");
+            DEBUGLOG("Memory allocation failed");
             ASSERT(0);
-            return;
+            return Utilities::Failed_to_allocate_memory;
         }
 
-        memcpy(ptr, data, size);
+        memcpy(ptr, data, size_t(size));
 
         set(ptr, size);
+
+        return Utilities::Success;
     }
 
     void Binary_data::move(Binary_data & data)
@@ -143,7 +163,7 @@ namespace Memory
         data.set(nullptr, 0);
     }
 
-    void Binary_data::set(Platform::uint8 * data, size_t size)
+    void Binary_data::set(Platform::uint8 * data, size_type size)
     {
         m_data = data;
         m_size = size;

@@ -39,6 +39,7 @@
 #include <Utilities\basic\ErrorCodes.hpp>
 #include <Utilities\basic\Log.hpp>
 
+#include <fstream>
 #include <iostream>
 #include <utility>
 

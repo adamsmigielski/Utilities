@@ -26,13 +26,19 @@
 
 /**
 * @author Adam Œmigielski
-* @file Float.hpp
+* @file Font.hpp
 **/
 
 #ifndef TEXT_FONT_HPP
 #define TEXT_FONT_HPP
 
-#include <memory>
+#include "Glyph.hpp"
+
+#include <Utilities\memory\Binary_data.hpp>
+
+/* Defines number of lut elements used by text module */
+#define TEXT_FONT_CHAR_LUT_SIZE 128
+
 
 namespace Text
 {
@@ -44,21 +50,34 @@ namespace Text
     class Font
     {
     public:
+        /* Types */
         using character_t = Platform::uint32;
 
-        Font() = default;
-        ~Font() = default;
+        /* Ctr & dtr */
+        Font();
+        ~Font();
 
+        /* No copying */
+        Font(const Font & font) = delete;
+        Font & operator =(const Font & font) = delete;
+
+        /* Move */
+        Font(Font && font);
+        Font & operator = (Font && font);
+
+        /* Init & release */
         Platform::int32 Init(
             Memory::Binary_data && data,
             bool is_endianess_swapped);
         Memory::Binary_data Store() const;
         void Release();
 
+        /* Access */
         const Glyph * Get_glyph(character_t character) const;
+        const Glyph::Descriptor * Get_max() const;
 
     private:
-        std::unique_ptr < Font_pimpl > m_pimpl;
+        Font_pimpl * m_pimpl;
     };
 }
 

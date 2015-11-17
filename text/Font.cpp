@@ -26,28 +26,69 @@
 
 /**
 * @author Adam Œmigielski
-* @file Float.hpp
+* @file Font.cpp
 **/
 
 #include "PCH.hpp"
 #include "Font.hpp"
-#include <map>
-#include "Glyph.hpp"
 
 #include <Utilities\memory\MemoryAccess.hpp>
+
+#include <algorithm>
+#include <map>
 
 namespace Text
 {
     using Map = std::map < Font::character_t, Glyph > ;
 
-#define TEXT_FONT_CHAR_LUT_SIZE 128
 
     class Font_pimpl
     {
     public:
+        /* Ctr & dtr */
+        Font_pimpl();
+        ~Font_pimpl() = default;
+
+        /* Copy */
+        Font_pimpl(const Font_pimpl&) = delete;
+        Font_pimpl & operator = (const Font_pimpl &) = delete;
+
+        /* Members */
         Glyph m_ascii[TEXT_FONT_CHAR_LUT_SIZE];
         Map m_map;
+
+        Glyph::Descriptor m_max;
     };
+
+    Font_pimpl::Font_pimpl()
+    {
+        m_max = Glyph::Descriptor{ 0, 0, 0, 0, 0, 0, 0, 0 };
+    }
+
+    Font::Font()
+        : m_pimpl(nullptr)
+    {
+        /* Nothing to be done */
+    }
+
+    Font::~Font()
+    {
+        Release();
+    }
+
+    Font::Font(Font && font)
+    {
+        m_pimpl = font.m_pimpl;
+        font.m_pimpl = nullptr;
+    }
+
+    Font & Font::operator = (Font && font)
+    {
+        m_pimpl = font.m_pimpl;
+        font.m_pimpl = nullptr;
+
+        return *this;
+    }
 
     /** \brief Unpacks glyphs from memory
      *
@@ -75,7 +116,7 @@ namespace Text
                 return Utilities::Failed_to_allocate_memory;
             }
 
-            m_pimpl.reset(ptr);
+            m_pimpl = ptr;
         }
 
         /* Get NOG */
@@ -89,21 +130,21 @@ namespace Text
         }
 
         /* Calculate constants */
-        const size_t off_chars = sizeof(Platform::uint32);
-        const size_t size_chars = nog * sizeof(Font::character_t);
-        const size_t off_descs = off_chars + size_chars;
-        const size_t size_descs = nog * sizeof(Glyph::Descriptor);
-        const size_t off_img_offs = off_descs + size_descs;
-        const size_t size_img_offs = nog * sizeof(Platform::uint64);
-        const size_t off_imgs = off_img_offs + size_img_offs;
+        const Platform::uint64 off_chars = sizeof(Platform::uint32);
+        const Platform::uint64 size_chars = nog * sizeof(Font::character_t);
+        const Platform::uint64 off_descs = off_chars + size_chars;
+        const Platform::uint64 size_descs = nog * sizeof(Glyph::Descriptor);
+        const Platform::uint64 off_img_offs = off_descs + size_descs;
+        const Platform::uint64 size_img_offs = nog * sizeof(Platform::uint64);
+        const Platform::uint64 off_imgs = off_img_offs + size_img_offs;
 
         /* Read each glyph */
         for (Platform::uint32 i = 0; i < nog; ++i)
         {
             /* Calculate constants */
-            const size_t off_char = off_chars + i * sizeof(Font::character_t);
-            const size_t off_desc = off_descs + i * sizeof(Glyph::Descriptor);
-            const size_t off_img_off = off_img_offs + i * sizeof(Platform::uint64);
+            const Platform::uint64 off_char = off_chars + i * sizeof(Font::character_t);
+            const Platform::uint64 off_desc = off_descs + i * sizeof(Glyph::Descriptor);
+            const Platform::uint64 off_img_off = off_img_offs + i * sizeof(Platform::uint64);
 
             /* Get data */
             Font::character_t character = 0;
@@ -161,6 +202,16 @@ namespace Text
             {
                 m_pimpl->m_map[character].Init(std::move(img_data), descriptor);
             }
+
+            /* Select max */
+            m_pimpl->m_max.m_width = std::max(m_pimpl->m_max.m_width, descriptor.m_width);
+            m_pimpl->m_max.m_height = std::max(m_pimpl->m_max.m_height, descriptor.m_height);
+            m_pimpl->m_max.m_left = std::min(m_pimpl->m_max.m_left, descriptor.m_left);
+            m_pimpl->m_max.m_top = std::max(m_pimpl->m_max.m_top, descriptor.m_top);
+            m_pimpl->m_max.m_right = std::max(m_pimpl->m_max.m_right, descriptor.m_right);
+            m_pimpl->m_max.m_bottom = std::min(m_pimpl->m_max.m_bottom, descriptor.m_bottom);
+            m_pimpl->m_max.m_horizontal_advance = std::max(m_pimpl->m_max.m_horizontal_advance, descriptor.m_horizontal_advance);
+            m_pimpl->m_max.m_vertical_advance = std::min(m_pimpl->m_max.m_vertical_advance, descriptor.m_vertical_advance);
         }
 
         return Utilities::Success;
@@ -170,7 +221,7 @@ namespace Text
     {
         Memory::Binary_data result;
 
-        if (nullptr == m_pimpl.get())
+        if (nullptr == m_pimpl)
         {
             return result;
         }
@@ -200,34 +251,34 @@ namespace Text
 
 
         /* Calculate constants */
-        const size_t off_chars = sizeof(Platform::uint32);
-        const size_t size_chars = nog * sizeof(Font::character_t);
-        const size_t off_descs = off_chars + size_chars;
-        const size_t size_descs = nog * sizeof(Glyph::Descriptor);
-        const size_t off_img_offs = off_descs + size_descs;
-        const size_t size_img_offs = nog * sizeof(Platform::uint64);
-        const size_t off_imgs = off_img_offs + size_img_offs;
-        const size_t memory_req = off_imgs + image_data_size;
+        const Platform::uint64 off_chars = sizeof(Platform::uint32);
+        const Platform::uint64 size_chars = nog * sizeof(Font::character_t);
+        const Platform::uint64 off_descs = off_chars + size_chars;
+        const Platform::uint64 size_descs = nog * sizeof(Glyph::Descriptor);
+        const Platform::uint64 off_img_offs = off_descs + size_descs;
+        const Platform::uint64 size_img_offs = nog * sizeof(Platform::uint64);
+        const Platform::uint64 off_imgs = off_img_offs + size_img_offs;
+        const Platform::uint64 memory_req = off_imgs + image_data_size;
 
         /* Allocate memory */
-        auto ptr = new Platform::uint8[memory_req];
+        auto ptr = new Platform::uint8[size_t(memory_req)];
         result.Reset(ptr, memory_req);
 
         /* Store each glyph */
-        size_t off_img = off_imgs;
+        Platform::uint64 off_img = off_imgs;
         Platform::uint32 index = 0;
 
         auto write_glyph = [=](
             character_t character,
             const Glyph * glyph,
             Platform::uint32 index,
-            size_t & off_img)
+            Platform::uint64 & off_img)
             -> Platform::int32
         {
             /* Calculate constants */
-            const size_t off_char = off_chars + index * sizeof(Font::character_t);
-            const size_t off_desc = off_descs + index * sizeof(Glyph::Descriptor);
-            const size_t off_img_off = off_img_offs + index * sizeof(Platform::uint64);
+            const Platform::uint64 off_char = off_chars + index * sizeof(Font::character_t);
+            const Platform::uint64 off_desc = off_descs + index * sizeof(Glyph::Descriptor);
+            const Platform::uint64 off_img_off = off_img_offs + index * sizeof(Platform::uint64);
 
             /* Get size */
             auto size = glyph->Get_data().Size();
@@ -308,15 +359,16 @@ namespace Text
 
     void Font::Release()
     {
-        if (nullptr != m_pimpl.get())
+        if (nullptr != m_pimpl)
         {
-            m_pimpl.release();
+            delete m_pimpl;
+            m_pimpl = nullptr;
         }
     }
 
     const Glyph * Font::Get_glyph(character_t character) const
     {
-        if (nullptr == m_pimpl.get())
+        if (nullptr == m_pimpl)
         {
             return nullptr;
         }
@@ -338,5 +390,15 @@ namespace Text
                 return nullptr;
             }
         }
+    }
+
+    const Glyph::Descriptor * Font::Get_max() const
+    {
+        if (nullptr == m_pimpl)
+        {
+            return nullptr;
+        }
+
+        return &m_pimpl->m_max;
     }
 }

@@ -36,6 +36,8 @@ namespace Memory
 {
     namespace Access
     {
+        using size_type = Platform::uint64;
+
         template <typename T>
         class Wrapper
         {
@@ -47,11 +49,11 @@ namespace Memory
             }
 
             Platform::int32 Read(
-                size_t offset,
+                size_type offset,
                 void * buffer,
-                size_t size)
+                size_type size)
             {
-                uint8 * ptr = (uint8 *) &m_t[offset];
+                auto ptr = (Platform::uint8 *)&m_t[offset];
 
                 if (nullptr == ptr)
                 {
@@ -65,11 +67,11 @@ namespace Memory
             }
 
             Platform::int32 Write(
-                size_t offset,
+                size_type offset,
                 const void * buffer,
-                size_t size)
+                size_type size)
             {
-                uint8 * ptr = (uint8 *) &m_t[offset];
+                auto ptr = (Platform::uint8 *)&m_t[offset];
 
                 if (nullptr == ptr)
                 {
@@ -77,7 +79,7 @@ namespace Memory
                     return Utilities::Failure;
                 }
 
-                memcpy(ptr, buffer, size);
+                memcpy(ptr, buffer, size_t(size));
 
                 return Utilities::Success;
             }
@@ -97,9 +99,9 @@ namespace Memory
             }
 
             Platform::int32 Read(
-                size_t offset,
+                size_type offset,
                 void * buffer,
-                size_t size)
+                size_type size)
             {
                 if (m_t.Size() < offset + size)
                 {
@@ -115,15 +117,15 @@ namespace Memory
                     return Utilities::Failure;
                 }
 
-                memcpy(buffer, ptr, size);
+                memcpy(buffer, ptr, size_t(size));
 
                 return Utilities::Success;
             }
 
             Platform::int32 Write(
-                size_t offset,
+                size_type offset,
                 const void * buffer,
-                size_t size)
+                size_type size)
             {
                 if (m_t.Size() < offset + size)
                 {
@@ -139,7 +141,7 @@ namespace Memory
                     return Utilities::Failure;
                 }
 
-                memcpy(ptr, buffer, size);
+                memcpy(ptr, buffer, size_t(size));
 
                 return Utilities::Success;
             }
@@ -159,9 +161,9 @@ namespace Memory
             }
 
             Platform::int32 Read(
-                size_t offset,
+                size_type offset,
                 void * buffer,
-                size_t size)
+                size_type size)
             {
                 m_t.seekg(offset, std::fstream::beg);
 
@@ -177,9 +179,9 @@ namespace Memory
             }
 
             Platform::int32 Write(
-                size_t offset,
+                size_type offset,
                 const void * buffer,
-                size_t size)
+                size_type size)
             {
                 m_t.seekp(offset, std::fstream::beg);
 
@@ -218,22 +220,14 @@ namespace Memory
             }
         }
 
-        template <>
-        void Swap_endianess(Platform::int8 & c)
-        {
-            /* Nothing to be done here */
-        }
+        void Swap_endianess(Platform::int8 & c);
 
-        template <>
-        void Swap_endianess(Platform::uint8 & c)
-        {
-            /* Nothing to be done here */
-        }
+        void Swap_endianess(Platform::uint8 & c);
 
         template <typename B, typename T>
         Platform::int32 Read(
             B & b,
-            size_t offset,
+            size_type offset,
             T & out_t)
         {
             Wrapper<B> w(b);
@@ -247,7 +241,7 @@ namespace Memory
         template <typename B, typename T>
         Platform::int32 Read(
             B & b,
-            size_t offset,
+            size_type offset,
             bool swap_endianess,
             T & out_t)
         {
@@ -271,8 +265,8 @@ namespace Memory
         template <typename B, typename T>
         Platform::int32 Read(
             B & b,
-            size_t offset,
-            size_t size,
+            size_type offset,
+            size_type size,
             T * t)
         {
             Wrapper<B> w(b);
@@ -286,7 +280,7 @@ namespace Memory
         template <typename B>
         Platform::int32 Read(
             B & b,
-            size_t offset,
+            size_type offset,
             bool swap_endianess,
             std::string & out_string)
         {
@@ -329,7 +323,7 @@ namespace Memory
         template <typename B, typename T>
         Platform::int32 Write(
             B & b,
-            size_t offset,
+            size_type offset,
             const T & t)
         {
             Wrapper<B> w(b);
@@ -339,7 +333,7 @@ namespace Memory
         template <typename B>
         Platform::int32 Write(
             Wrapper<B> & w,
-            size_t offset,
+            size_type offset,
             const std::string & string)
         {
             Wrapper<B> w(b);
@@ -360,9 +354,9 @@ namespace Memory
         template <typename B, typename T>
         Platform::int32 Write(
             B & b,
-            size_t offset,
+            size_type offset,
             const T * t,
-            size_t size)
+            size_type size)
         {
             Wrapper<B> w(b);
             return w.Write(offset, t, size);
