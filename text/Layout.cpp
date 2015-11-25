@@ -168,50 +168,60 @@ namespace Text
             Platform::int32 cursor_y = 0;
 
             start_new_box(*current_box, *max, cursor_x, cursor_y);
-            
-            for (; current_char_index < characters_count; ++current_char_index)
+
+            /* For each line */
+            while (true == does_glyph_fit_vertically(*current_box, *max, cursor_y))
             {
-                const auto character = text[current_char_index];
+                do {
+                    const auto character = text[current_char_index];
 
-                const Glyph * glyph = font.Get_glyph(character);
-                const auto& descriptor = glyph->Get_descriptor();
-
-                /* Fit glyph */
-                if (false == does_glyph_fit_vertically(*current_box, descriptor, cursor_y))
-                {
-                    break /* Go to another box */;
-                }
-
-                if (false == does_glyph_fit_horizontally(*current_box, descriptor, cursor_x))
-                {
-                    /* Go to next line */
-                    return_cursor_in_line(*current_box, cursor_x);
-                    advance_cursor_in_row(*max, cursor_y);
+                    const Glyph * glyph = font.Get_glyph(character);
+                    const auto& descriptor = glyph->Get_descriptor();
 
                     if (false == does_glyph_fit_horizontally(*current_box, descriptor, cursor_x))
                     {
-                        break; /* Go to another box */
+                        break; /* Start new line and try with the same character */
                     }
-                }
 
-                /* Save glyph_usage and position */
-                auto ret = add_glyph_position(                    
-                    current_box,
-                    cursor_x,
-                    cursor_y,
-                    glyph,
-                    positions);
-                if (nullptr == ret)
+                    /* Save glyph_usage and position */
+                    auto ret = add_glyph_position(
+                        current_box,
+                        cursor_x,
+                        cursor_y,
+                        glyph,
+                        positions);
+                    if (nullptr == ret)
+                    {
+                        ASSERT(0);
+                        release_resources(positions);
+                        return Utilities::Failed_to_allocate_memory;
+                    }
+
+                    /* Advance cursor in line */
+                    advance_cursor_in_line(descriptor, cursor_x);
+
+                    /* Increment index */
+                    ++current_char_index;
+                } while (1);
+
+
+                /* All characters done */
+                if (current_char_index != characters_count)
                 {
-                    ASSERT(0);
-                    release_resources(positions);
-                    return Utilities::Failed_to_allocate_memory;
+                    /* Start new line */
+                    return_cursor_in_line(*current_box, cursor_x);
+                    advance_cursor_in_row(*max, cursor_y);
+                }
+                else
+                {
+                    break;
                 }
             }
 
             /* All characters done */
             if (current_char_index != characters_count)
             {
+                /* Go to next box */
                 ++current_box_index;
             }
             else
@@ -238,7 +248,7 @@ namespace Text
 
             for (auto it : positions)
             {
-                ptr[index] = it;
+                ptr[index++] = it;
             }
         }
 

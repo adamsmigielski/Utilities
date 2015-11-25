@@ -332,14 +332,17 @@ namespace Memory
 
         template <typename B>
         Platform::int32 Write(
-            Wrapper<B> & w,
+            B & b,
             size_type offset,
             const std::string & string)
         {
             Wrapper<B> w(b);
-            const uint32 length = (uint32)string.length();
+            Platform::uint32 length = string.size();;
 
-            if (Utilities::Success != w.Write(offset, &length, sizeof(uint32)))
+            if (Utilities::Success != w.Write(
+                offset,
+                &length,
+                sizeof(Platform::uint32)))
             {
                 ASSERT(0);
                 return Utilities::Failure;
@@ -347,7 +350,7 @@ namespace Memory
 
             return w.Write(
                 offset + sizeof(length),
-                string.data(),
+                &string.front(),
                 length);
         }
 

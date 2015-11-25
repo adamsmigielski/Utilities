@@ -66,14 +66,20 @@ namespace Text
         Font & operator = (Font && font);
 
         /* Init & release */
+        Platform::int32 Init();
         Platform::int32 Init(
             Memory::Binary_data && data,
             bool is_endianess_swapped);
-        Memory::Binary_data Store() const;
+        Platform::int32 Font::Store(Memory::Binary_data & out_result) const;
         void Release();
 
         /* Access */
+        Platform::int32 Add_glyph(
+            const character_t character,
+            const Glyph::Descriptor & decriptor,
+            Memory::Binary_data && image);
         const Glyph * Get_glyph(character_t character) const;
+        const Glyph * Get_glyph_raw(character_t character) const;
         const Glyph::Descriptor * Get_max() const;
 
     private:

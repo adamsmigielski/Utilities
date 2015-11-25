@@ -190,10 +190,17 @@ namespace Containers
 
         template <typename T>
         List<T>::List(List && list)
-            : m_first(std::move(list.m_first))
-            , m_last(std::move(list.m_last))
         {
-            /* Nothing to be done */
+            m_first = list.m_first;
+            m_last = list.m_last;
+
+            list.m_first = nullptr;
+            list.m_last = nullptr;
+
+            for (auto it = m_first; it != nullptr; it = it->m_next)
+            {
+                it->m_parent = this;
+            }
         }
 
         template <typename T>

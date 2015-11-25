@@ -264,7 +264,7 @@ UNIT_TEST(Text_font_init)
         /* Descriptors */
         const size_t off_descs = off_char + nog * sizeof(Platform::uint32);
         Memory::Access::Write(ptr, off_descs, desc_0);
-        Memory::Access::Write(ptr, off_descs + desc_size, desc_0);
+        Memory::Access::Write(ptr, off_descs + desc_size, desc_1);
 
         /* Img offsets */
         const size_t off_img_offs = off_descs + nog * desc_size;
@@ -272,13 +272,14 @@ UNIT_TEST(Text_font_init)
         Memory::Access::Write(ptr, off_img_offs + sizeof(Platform::uint64), Platform::uint64(total_size - img_1_size));
 
         /* Img data */
+        const size_t off_img = off_img_offs + nog * sizeof(Platform::uint64);
         for (size_t i = 0; i < desc_0.m_width * desc_0.m_height; ++i)
         {
-            ptr[off_img_offs + i] = 0;
+            ptr[off_img + i] = 0;
         }
         for (size_t i = 0; i < desc_1.m_width * desc_1.m_height; ++i)
         {
-            ptr[off_img_offs + img_0_size + i] = 1;
+            ptr[off_img + img_0_size + i] = 1;
         }
 
         Memory::Binary_data data(ptr, total_size);
@@ -349,8 +350,8 @@ UNIT_TEST(Text_font_init)
 
         for (size_t i = 0; i < TEXT_FONT_CHAR_LUT_SIZE; ++i)
         {
-            auto glyph = font.Get_glyph(2);
-            TEST_ASSERT((Text::Glyph *) 0, glyph);
+            auto glyph = font.Get_glyph(i);
+            TEST_ASSERT_NOT_EQUAL((Text::Glyph *) 0, glyph);
         }
     }
 
@@ -363,18 +364,59 @@ UNIT_TEST(Text_font_init)
     }
 
     static const Text::Box boxes[] = {
-        { 0, 0, 2, -2 },
-        { 0, 0, 4, -4 },
-        { 0, 0, 4, -4 },
-        { 0, 0, 6, -4 },
-        { 0, 0, 6, -12 },
-        { 0, 0, 12, -4 },
+        { 0, 0, 2, -4 },
+        { 0, 2, 2, -4 },
+        { 0, 2, 4, -4 },
+        { 0, 2, 6, -4 },
+        { 0, 2, 8, -4 },
+        { 0, 0, 8, -12 },
+        { 0, 2, 16, -4 },
     };
     static const size_t boxes_count = sizeof(boxes) / sizeof(boxes[0]);
     Text::Font::character_t text[] = { 0, 1, 0, 1, 0, 1, 0 };
     static const size_t text_count = sizeof(text) / sizeof(text[0]);
     Text::Layout layout = { 0 };
     auto ret = Text::Init_layout(font_b, boxes, boxes_count, text, text_count, layout);
+
+    TEST_ASSERT(layout.m_Count, 7);
+    TEST_ASSERT_NOT_EQUAL(layout.m_Positions, (Text::Glyph_position **) 0);
+
+    TEST_ASSERT(layout.m_Positions[0]->m_Box, boxes + 2);
+    TEST_ASSERT(layout.m_Positions[0]->m_Glyph, font_b.Get_glyph(0));
+    TEST_ASSERT(layout.m_Positions[0]->m_X, 0);
+    TEST_ASSERT(layout.m_Positions[0]->m_Y, -2);
+
+    TEST_ASSERT(layout.m_Positions[1]->m_Box, boxes + 4);
+    TEST_ASSERT(layout.m_Positions[1]->m_Glyph, font_b.Get_glyph(1));
+    TEST_ASSERT(layout.m_Positions[1]->m_X, 0);
+    TEST_ASSERT(layout.m_Positions[1]->m_Y, -2);
+
+    TEST_ASSERT(layout.m_Positions[2]->m_Box, boxes + 5);
+    TEST_ASSERT(layout.m_Positions[2]->m_Glyph, font_b.Get_glyph(0));
+    TEST_ASSERT(layout.m_Positions[2]->m_X, 0);
+    TEST_ASSERT(layout.m_Positions[2]->m_Y, -4);
+
+    TEST_ASSERT(layout.m_Positions[3]->m_Box, boxes + 5);
+    TEST_ASSERT(layout.m_Positions[3]->m_Glyph, font_b.Get_glyph(1));
+    TEST_ASSERT(layout.m_Positions[3]->m_X, 0);
+    TEST_ASSERT(layout.m_Positions[3]->m_Y, -10);
+
+    TEST_ASSERT(layout.m_Positions[4]->m_Box, boxes + 6);
+    TEST_ASSERT(layout.m_Positions[4]->m_Glyph, font_b.Get_glyph(0));
+    TEST_ASSERT(layout.m_Positions[4]->m_X, 0);
+    TEST_ASSERT(layout.m_Positions[4]->m_Y, -2);
+
+    TEST_ASSERT(layout.m_Positions[5]->m_Box, boxes + 6);
+    TEST_ASSERT(layout.m_Positions[5]->m_Glyph, font_b.Get_glyph(1));
+    TEST_ASSERT(layout.m_Positions[5]->m_X, 4);
+    TEST_ASSERT(layout.m_Positions[5]->m_Y, -2);
+
+    TEST_ASSERT(layout.m_Positions[6]->m_Box, boxes + 6);
+    TEST_ASSERT(layout.m_Positions[6]->m_Glyph, font_b.Get_glyph(0));
+    TEST_ASSERT(layout.m_Positions[6]->m_X, 12);
+    TEST_ASSERT(layout.m_Positions[6]->m_Y, -2);
+
+    Text::Release_layout(layout);
 
     return Passed;
 }

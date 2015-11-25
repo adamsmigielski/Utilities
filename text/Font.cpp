@@ -90,6 +90,22 @@ namespace Text
         return *this;
     }
 
+    Platform::int32 Font::Init()
+    {
+        auto ptr = new Font_pimpl;
+
+        if (nullptr == ptr)
+        {
+            ERRLOG("Memory allocation failure");
+            ASSERT(0);
+            return Utilities::Failed_to_allocate_memory;
+        }
+
+        m_pimpl = ptr;
+
+        return Utilities::Success;
+    }
+
     /** \brief Unpacks glyphs from memory
      *
      * The memory layout is as follows:
@@ -193,37 +209,39 @@ namespace Text
             Memory::Binary_data img_data;
             img_data.Copy_range(data, off_img, size);
 
-            /* Store glyph */
-            if (TEXT_FONT_CHAR_LUT_SIZE > character)
+            ret = Add_glyph(character, descriptor, std::move(img_data));
+            if (Utilities::Success != ret)
             {
-                m_pimpl->m_ascii[character].Init(std::move(img_data), descriptor);
-            }
-            else
-            {
-                m_pimpl->m_map[character].Init(std::move(img_data), descriptor);
+                Release();
+                return ret;
             }
 
             /* Select max */
-            m_pimpl->m_max.m_width = std::max(m_pimpl->m_max.m_width, descriptor.m_width);
-            m_pimpl->m_max.m_height = std::max(m_pimpl->m_max.m_height, descriptor.m_height);
-            m_pimpl->m_max.m_left = std::min(m_pimpl->m_max.m_left, descriptor.m_left);
-            m_pimpl->m_max.m_top = std::max(m_pimpl->m_max.m_top, descriptor.m_top);
-            m_pimpl->m_max.m_right = std::max(m_pimpl->m_max.m_right, descriptor.m_right);
-            m_pimpl->m_max.m_bottom = std::min(m_pimpl->m_max.m_bottom, descriptor.m_bottom);
-            m_pimpl->m_max.m_horizontal_advance = std::max(m_pimpl->m_max.m_horizontal_advance, descriptor.m_horizontal_advance);
-            m_pimpl->m_max.m_vertical_advance = std::min(m_pimpl->m_max.m_vertical_advance, descriptor.m_vertical_advance);
+            if (0 != i)
+            {
+                m_pimpl->m_max.m_width = std::max(m_pimpl->m_max.m_width, descriptor.m_width);
+                m_pimpl->m_max.m_height = std::max(m_pimpl->m_max.m_height, descriptor.m_height);
+                m_pimpl->m_max.m_left = std::min(m_pimpl->m_max.m_left, descriptor.m_left);
+                m_pimpl->m_max.m_top = std::max(m_pimpl->m_max.m_top, descriptor.m_top);
+                m_pimpl->m_max.m_right = std::max(m_pimpl->m_max.m_right, descriptor.m_right);
+                m_pimpl->m_max.m_bottom = std::min(m_pimpl->m_max.m_bottom, descriptor.m_bottom);
+                m_pimpl->m_max.m_horizontal_advance = std::max(m_pimpl->m_max.m_horizontal_advance, descriptor.m_horizontal_advance);
+                m_pimpl->m_max.m_vertical_advance = std::min(m_pimpl->m_max.m_vertical_advance, descriptor.m_vertical_advance);
+            }
+            else
+            {
+                m_pimpl->m_max = descriptor;
+            }
         }
 
         return Utilities::Success;
     }
 
-    Memory::Binary_data Font::Store() const
+    Platform::int32 Font::Store(Memory::Binary_data & out_result) const
     {
-        Memory::Binary_data result;
-
         if (nullptr == m_pimpl)
         {
-            return result;
+            return Utilities::Invalid_object;
         }
 
         /* Get NOG & image data size */
@@ -232,12 +250,12 @@ namespace Text
 
         for (Platform::uint32 i = 0; i < TEXT_FONT_CHAR_LUT_SIZE; ++i)
         {
-            auto glyph = Get_glyph(i);
+            auto glyph = Get_glyph_raw(i);
 
-            auto size = glyph->Get_data().Size();
-
-            if (0 != size)
+            if (nullptr != glyph)
             {
+                auto size = glyph->Get_data().Size();
+
                 ++nog;
                 image_data_size += size;
             }
@@ -262,13 +280,26 @@ namespace Text
 
         /* Allocate memory */
         auto ptr = new Platform::uint8[size_t(memory_req)];
-        result.Reset(ptr, memory_req);
+        if (nullptr == ptr)
+        {
+            ASSERT(0);
+            return Utilities::Failed_to_allocate_memory;
+        }
+        out_result.Reset(ptr, memory_req);
+
+        /* Store NOG */
+        auto ret = Memory::Access::Write(out_result, 0, nog);
+        if (Utilities::Success != ret)
+        {
+            ERRLOG("Corrupted resource");
+            return ret;
+        }
 
         /* Store each glyph */
         Platform::uint64 off_img = off_imgs;
         Platform::uint32 index = 0;
 
-        auto write_glyph = [=](
+        auto write_glyph = [&](
             character_t character,
             const Glyph * glyph,
             Platform::uint32 index,
@@ -283,39 +314,37 @@ namespace Text
             /* Get size */
             auto size = glyph->Get_data().Size();
 
-            /* Skip glyph if there is no image */
-            if (0 == size)
-            {
-                return Utilities::Success;
-            }
-
             /* Store data */
-            auto ret = Memory::Access::Write(result, off_char, character);
+            auto ret = Memory::Access::Write(out_result, off_char, character);
             if (Utilities::Success != ret)
             {
                 ERRLOG("Corrupted resource");
                 return ret;
             }
 
-            ret = Memory::Access::Write(result, off_desc, glyph->Get_descriptor());
+            ret = Memory::Access::Write(out_result, off_desc, glyph->Get_descriptor());
             if (Utilities::Success != ret)
             {
                 ERRLOG("Corrupted resource");
                 return ret;
             }
 
-            ret = Memory::Access::Write(result, off_img_off, off_img);
+            ret = Memory::Access::Write(out_result, off_img_off, off_img);
             if (Utilities::Success != ret)
             {
                 ERRLOG("Corrupted resource");
                 return ret;
             }
 
-            ret = Memory::Access::Write(result, off_img, glyph->Get_data().Data(), size);
-            if (Utilities::Success != ret)
+            /* Glyph may be empty, skip images with size 0 */
+            if (0 != size)
             {
-                ERRLOG("Corrupted resource");
-                return ret;
+                ret = Memory::Access::Write(out_result, off_img, glyph->Get_data().Data(), size);
+                if (Utilities::Success != ret)
+                {
+                    ERRLOG("Corrupted resource");
+                    return ret;
+                }
             }
 
             off_img += size;
@@ -326,14 +355,18 @@ namespace Text
 
         for (Platform::uint32 i = 0; i < TEXT_FONT_CHAR_LUT_SIZE; ++i)
         {
-            const Glyph * glyph = m_pimpl->m_ascii + i;
+            const Glyph * glyph = Get_glyph_raw(i);
+            
+            if (nullptr == glyph)
+            {
+                continue;
+            }
 
             auto ret = write_glyph(i, glyph, index, off_img);
             if (Utilities::Success != ret)
             {
-                ERRLOG("Corrupted resource");
                 ASSERT(0);
-                return result;
+                return ret;
             }
 
             ++index;
@@ -346,15 +379,14 @@ namespace Text
             auto ret = write_glyph(it.first, glyph, index, off_img);
             if (Utilities::Success != ret)
             {
-                ERRLOG("Corrupted resource");
                 ASSERT(0);
-                return result;
+                return ret;
             }
 
             ++index;
         }
 
-        return result;
+        return Utilities::Success;
     }
 
     void Font::Release()
@@ -366,16 +398,68 @@ namespace Text
         }
     }
 
+    Platform::int32 Font::Add_glyph(
+        const Font::character_t character,
+        const Glyph::Descriptor & descriptor,
+        Memory::Binary_data && image)
+    {
+        if (nullptr == m_pimpl)
+        {
+            ASSERT(0);
+            return Utilities::Invalid_object;
+        }
+
+        /* Store glyph */
+        if (TEXT_FONT_CHAR_LUT_SIZE > character)
+        {
+            m_pimpl->m_ascii[character].Init(std::move(image), descriptor);
+        }
+        else
+        {
+            m_pimpl->m_map[character].Init(std::move(image), descriptor);
+        }
+
+        return Utilities::Success;
+    }
+
     const Glyph * Font::Get_glyph(character_t character) const
     {
         if (nullptr == m_pimpl)
         {
+            ASSERT(0);
             return nullptr;
         }
 
+        const Glyph * ptr = Get_glyph_raw(character);
+
+        if (nullptr != ptr)
+        {
+            return ptr;
+        }
+        else
+        {
+            return &m_pimpl->m_ascii[0];
+        }
+    }
+
+    const Glyph * Font::Get_glyph_raw(character_t character) const
+    {
+        if (nullptr == m_pimpl)
+        {
+            ASSERT(0);
+            return nullptr;
+        }
+
+        const Glyph * ptr = nullptr;
+
         if (TEXT_FONT_CHAR_LUT_SIZE > character)
         {
-            return &m_pimpl->m_ascii[character];
+            auto tmp = &m_pimpl->m_ascii[character];
+
+            if (false == tmp->Get_data().Is_null())
+            {
+                ptr = tmp;
+            }
         }
         else
         {
@@ -383,13 +467,11 @@ namespace Text
 
             if (m_pimpl->m_map.end() != it)
             {
-                return &it->second;
-            }
-            else
-            {
-                return nullptr;
+                ptr = &it->second;
             }
         }
+            
+        return ptr;
     }
 
     const Glyph::Descriptor * Font::Get_max() const

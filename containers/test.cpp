@@ -195,6 +195,29 @@ UNIT_TEST(Intrusive_list_attached)
     return Passed;
 }
 
+UNIT_TEST(Intrusive_list_move)
+{
+    auto res = new Int_list_res;
+    auto res_b = new Int_list_res;
+    auto res_c = new Int_list_res;
+    Int_list_res::List list;
+
+    /* A B C */
+    list.Attach(res);
+    list.Attach(res_b);
+    list.Attach(res_c);
+
+    {
+        Int_list_res::List list_2(std::move(list));
+
+        TEST_ASSERT((Int_list_res *) 0, list->First());
+        TEST_ASSERT(res, list_2->First());
+        TEST_ASSERT(&list_2, res->Parent());
+    }
+
+    return Passed;
+}
+
 
 
 UNIT_TEST(Intrusive_list_search_and_sort)
