@@ -1,6 +1,6 @@
 /** License
 *
-* Copyright (c) 2015 Adam Œmigielski
+* Copyright (c) 2014 Adam Œmigielski
 *
 *
 *  Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,33 +26,24 @@
 
 /**
 * @author Adam Œmigielski
-* @file ErrorCodes.hpp
+* @file Dll.hpp
 **/
 
-#ifndef UTILITIES_BASIC_ERROR_CODES_HPP
-#define UTILITIES_BASIC_ERROR_CODES_HPP
+#ifndef O8_COMMON_DLL_HPP
+#define O8_COMMON_DLL_HPP
 
-namespace Utilities
-{
-    enum Error_codes
-    {
-        /* Generic */
-        Success = 0,
-        Failure = -1,
-        Failed_to_allocate_memory = -32,
+#ifdef __MINGW32__
 
-        /* DL loader */
-        Failed_to_load_library = -64,
-        Failed_to_load_function,
+#define DLL_EXPORT __declspec(dllexport)
 
-        /* File access */
-        Failed_to_open_file = -128,
-        Failed_to_load_model,
+#define DLL_IMPORT __declspec(dllimport)
 
-        /* Invalid params */
-        Invalid_object = -512,
-        Invalid_parameter,
-    };
-}
+#else /* __MINGW32__ */
 
-#endif /* UTILITIES_BASIC_ERROR_CODES_HPP */
+#define DLL_EXPORT __declspec(dllexport)
+
+#define DLL_IMPORT __declspec(dllimport)
+
+#endif /* __MINGW32__ */
+
+#endif /* O8_COMMON_DLL_HPP */

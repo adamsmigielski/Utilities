@@ -5,6 +5,7 @@ ADD_LIBRARY (basic STATIC
              Assert.hpp
              BreakToDebug.hpp
 			 CallConvention.hpp
+			 Dll.hpp
 			 ErrorCodes.hpp
 			 Log.cpp
              Log.hpp

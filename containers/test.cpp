@@ -210,8 +210,8 @@ UNIT_TEST(Intrusive_list_move)
     {
         Int_list_res::List list_2(std::move(list));
 
-        TEST_ASSERT((Int_list_res *) 0, list->First());
-        TEST_ASSERT(res, list_2->First());
+        TEST_ASSERT((Int_list_res *) 0, list.First());
+        TEST_ASSERT(res, list_2.First());
         TEST_ASSERT(&list_2, res->Parent());
     }
 
